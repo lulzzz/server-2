@@ -1,0 +1,5 @@
+{
+    "Timeslot_date": "required", 
+    "Exam_group": "required|integer",
+    "Exam_type_idExam_type": "integer"
+}

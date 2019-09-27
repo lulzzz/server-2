@@ -1,0 +1,8 @@
+{
+    "Invoice_name":"maxLength:255",
+    "Invoice_address":"maxLength:255",
+    "Invoice_location":"maxLength:255",
+    "Invoice_zip_code":"maxLength:255",
+    "Invoice_tax_number":"integer",
+    "Invoice_email":"email"
+}

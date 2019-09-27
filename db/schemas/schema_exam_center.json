@@ -1,0 +1,13 @@
+{
+    "Exam_center_name": "required|maxLength:45",
+   	"Address": "required|maxLength:255",
+    "Center_num": "integer",
+    "Center_code": "integer",
+    "Tax_num": "integer",
+    "Zip_code": "maxLength:45",
+    "Telephone1": "phoneNumber",
+    "Telephone2": "phoneNumber",
+    "Email1": "email",
+    "Email2": "email"
+}
+

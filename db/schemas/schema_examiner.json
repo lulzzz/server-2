@@ -1,0 +1,7 @@
+{
+    "Examiner_name": "required|maxLength:50",
+   	"Num": "required|integer",
+    "License_num": "required|maxLength:45",
+    "License_expiration": "required|dateFormat:YYYY-MM-DD",
+    "Obs":"maxLength:255"
+}

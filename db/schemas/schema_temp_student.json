@@ -1,0 +1,12 @@
+{
+    "T_ID_type": "integer", 
+    "Student_name": "maxLength:50", 
+    "Birth_date": "maxLength:10|dateFormat:YYYY-MM-DD",
+    "ID_num": "maxLength:45", 
+    "tax_num": "integer", 
+    "Drive_license_num": "maxLength:45", 
+    "Obs": "maxLength:255", 
+    "School_Permit": "integer", 
+    "idType_category": "integer", 
+    "Student_license": "maxLength:45" 
+}

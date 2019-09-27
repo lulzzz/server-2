@@ -1,0 +1,41 @@
+{
+	"db_conn":
+	  	{
+	  		"connectionLimit" : 100,
+			"host"            : "dev.mysql",
+			"user"            : "root",
+			"password"        : "root",
+			"database"        : "anieca"
+		},
+	"backend": {
+		"port" : 4200,
+		"jwt_secret":"qwesdkfhsdlfjxcv"
+	},
+	"time_window":{
+		"minutes":59
+	},
+	"process_names":{
+		"Reservations":"Reservas",
+		"Bookings":"Marcações",
+		"Exams":"Exames"
+	},
+	"api_invoice":{
+		"url":"http://192.168.0.122:3000/invoices",
+		"url_customer":"http://192.168.0.122:3000/customers",
+		"url_product":"http://192.168.0.122:3000/products",
+		"url_saft":"http://192.168.0.122:3000/saft"
+	},
+	"imtt_url":{
+		"imtt_login":"http://parcerias.imtt.pt/login.php",
+		"imtt_upload":"http://parcerias.imtt.pt/ficheiros.php"
+	},
+	"easy_pay": {
+		"easy_pay_url": "https://api.test.easypay.pt/2.0/single/",
+		"easy_pay_account_id": "48e49b0e-1ba6-4b36-b584-08b00a994441",
+		"easy_pai_api_key": "c77502fd-9048-4812-af38-f253fa404206",
+		"easy_pay_header_code": "easypay-header-code"
+	},
+	"special_offers":{
+		"TM_exams":10
+	}
+}

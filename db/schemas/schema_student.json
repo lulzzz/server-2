@@ -1,0 +1,11 @@
+{
+    "Student_name": "required|maxLength:50",
+    "Birth_date": "required|dateFormat:YYYY-MM-DD",
+    "ID_num": "required|maxLength:45",
+    "ID_expire_date": "required|dateFormat:YYYY-MM-DD",
+    "Tax_num": "required|integer",
+    "Drive_license_num": "maxLength:45",
+    "Obs": "maxLength:255",
+    "Student_license": "required|maxLength:45",
+    "Expiration_date": "required|dateFormat:YYYY-MM-DD"
+}

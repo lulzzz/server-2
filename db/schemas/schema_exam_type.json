@@ -1,0 +1,5 @@
+{
+    "Exam_type_name": "required|maxLength:50",
+   	"Short": "maxLength:45",
+    "Description": "maxLength:45"
+}

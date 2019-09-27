@@ -1,0 +1,90 @@
+// get all timeslots without pauta for given date
+var Qget_byDateTimeslot = (idexam_center,date,cb)=>{
+	return myQuery('SELECT Timeslot.* FROM Timeslot LEFT JOIN Pauta '+
+					'ON Timeslot.idTimeslot = Pauta.Timeslot_idTimeslot '+
+					'WHERE Pauta.Timeslot_idTimeslot IS NULL AND Timeslot.Exam_center_idExam_center = ? '+
+					'AND Timeslot.Timeslot_date = ? AND Timeslot.Exam_type_idExam_type IS NOT NULL',
+                    [idexam_center,date],(error, results, fields)=> {
+		error ? cb(error) : cb(false,results);
+	});
+};
+
+// get all timeslots inside given date and time without examiner (exams that are about to start)
+var Qget_nextTimeslot=(idexam_center,date,time,cb)=>{
+	return myQuery('SELECT timeslot.* FROM timeslot LEFT JOIN Pauta '+
+					'ON Timeslot.idTimeslot = Pauta.Timeslot_idTimeslot '+
+					'WHERE Pauta.Examiner_qualifications_idExaminer_qualifications IS NULL '+
+					'AND Timeslot_date=? AND Begin_time<=? AND Exam_center_idExam_center = ? '+
+					'GROUP BY idTimeslot',[date,time,idexam_center],(error, results, fields)=>{
+		error ? cb(error) : cb(false,results);	
+	});
+};
+
+var Qget_timeslotByWeek = (idcancel,iDay, fDay, idExam_center, cb) => {
+    return myQuery("SELECT Timeslot.*, Exam_type_name, Num_students as Max_Num_Students, " +
+            "count(if(reservation.T_exam_status_idexam_status !=?,1,null)) as number_Reservations " +
+            "FROM timeslot " +
+            "LEFT JOIN reservation ON timeslot.idTimeslot=reservation.Timeslot_idTimeslot " +
+            "LEFT JOIN Exam_type ON timeslot.Exam_type_idExam_type=Exam_type.idExam_type " +
+            "WHERE Timeslot_date BETWEEN ? AND ? AND Timeslot.Exam_center_idExam_center=? " +
+            "GROUP BY timeslot.idTimeslot",
+            [idcancel,iDay + ' 00:00:00', fDay + ' 23:59:59', idExam_center], (error,results,fields) => {
+        error ? cb(error) : cb(false,results);
+    });
+};
+
+var Qget_TimeslotInDateTime = (Exam_date, idExam_center, Exam_group, cb) => {
+    return myQuery("SELECT Timeslot.*, Duration, Num_students " + 
+            "FROM Timeslot LEFT JOIN Exam_type ON Timeslot.Exam_type_idExam_type=Exam_type.idExam_type " +
+            "WHERE ? >= Timeslot.Begin_time AND ? < Timeslot.End_time AND Exam_center_idExam_center=? AND Exam_group=?",
+            [Exam_date, Exam_date, idExam_center, Exam_group], (error,results,fields) => {
+        error ? cb(error) : cb(false,results);
+    });
+};
+
+var Qget_timeslotById = (id, idExam_center, cb) => {
+    return myQuery("SELECT Timeslot.*, Num_Students as Max_Num_Students, count(reservation.Timeslot_idTimeslot) as number_Reservations " +
+                "FROM Timeslot LEFT JOIN reservation ON timeslot.idTimeslot=reservation.Timeslot_idTimeslot " +
+                "LEFT JOIN Exam_type ON Timeslot.Exam_type_idExam_type=idExam_type " +
+                "WHERE idTimeslot = ? AND Timeslot.Exam_center_idExam_center = ? " +
+                "GROUP BY timeslot.idTimeslot",
+                [id, idExam_center], (error,results,fields) => {
+        error ? cb(error) : cb(false,results);
+    });
+};
+
+// creates timeslot
+var Qpost_timeslot = (object, cb) => {
+    return myQuery('INSERT INTO `timeslot` (`Timeslot_date`,`Begin_time`, `End_time`, `Exam_group`, `Exam_type_idExam_type`, `Exam_center_idExam_center`) ' +
+        "VALUES (?)", [object], (error,results,fields) => {
+        error ? cb(error) : cb(false,results);
+    });
+};
+
+// delete timeslot by id
+var Qdelete_timeslot = (id, cb) => {
+    return myQuery("DELETE FROM Timeslot WHERE idTimeslot=?;", [id], (error,results,fields) => {
+        error ? cb(error) : cb(false,results);
+    });
+};
+
+// patch timeslot by id
+var Qpatch_timeslot = (object, id, cb) => {
+    return myQuery("UPDATE Timeslot SET ? WHERE idTimeslot=?;", [object, id], (error,results,fields) => {
+        error ? cb(error) : cb(false,results);
+    });
+};
+
+module.exports = function(myQuery){
+	return {
+		Qget_byDateTimeslot,
+		Qget_nextTimeslot,
+		Qget_timeslotByWeek,
+		Qget_TimeslotInDateTime,
+		Qget_timeslotById,
+		Qpost_timeslot,
+		Qdelete_timeslot,
+		Qpatch_timeslot
+	}
+}
+

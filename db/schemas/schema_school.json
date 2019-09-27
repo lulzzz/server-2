@@ -1,0 +1,14 @@
+{
+    "Permit": "required|integer",
+   	"Associate_num": "integer",
+    "School_name": "required|maxLength:45",
+    "Address": "required|maxLength:255",
+    "Tax_num": "required|integer",
+    "Zip_code": "maxLength:45",
+    "Location": "maxLength:45",
+    "Obs": "maxLength:255",
+    "Telephone1": "phoneNumber",
+    "Telephone2": "phoneNumber",
+    "Email1": "email",
+    "Email2": "email"
+}
