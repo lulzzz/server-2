@@ -3,14 +3,15 @@ var config = require('../config.json');
 var request = require('request');
 var _ = require('lodash');
 var nodemailer = require('nodemailer');
+var moment=require('moment');
 
-var bulk = async (req, res, next) => {
+var bulk = async () => {
     // console.log('here');
-    dbHandlers.Qgen_reservations.Qget_reservationWithouthEasyPayId(async (error, result) => {
+    dbHandlers.Qgen_reservations.Qget_reservationWithouthEasyPayId( async(error, result) => {
         if (error) {
             console.log(error);
-            return res.status(500).json({ message: "Error getting EasyPay ids." });
-        } else {
+            // return res.status(500).json({ message: "Error getting EasyPay ids." });
+        } else if (result.lenght > 0) {
             var withouthids = JSON.parse(JSON.stringify(result));
             // map results from bd to grou by school and put idReservation in array
             // TODO verificar que user criou e se pagou em dinheiro
@@ -19,19 +20,17 @@ var bulk = async (req, res, next) => {
                 .map((items, id) => ({
                     School_permit: id,
                     value: _.sumBy(items, 'Exam_price'),
-                    idReservation: _.map(items, 'idReservation')
+                    idReservation: _.map(items, 'idReservation'),
+                    Exam_center_idExam_center:_.map(items,'Exam_center_idExam_center')
                 }))
                 .value()
             console.log(withouthids);
-
             mapped.forEach(element => {
                 console.log(element);
-                // { School_permit: '439', value: 94.72, idReservation: [ 202, 203 ] }
-                // { School_permit: '483', value: 47.36, idReservation: [ 201 ] }  
-                // { School_permit: '538', value: 47.36, idReservation: [ 197 ] }  
-                // { School_permit: '578', value: 47.36, idReservation: [ 199 ] }  
-                // { School_permit: '631', value: 47.36, idReservation: [ 198 ] }  
-                // { School_permit: '641', value: 47.36, idReservation: [ 196 ] } 
+
+                var today= moment().format("YYYY-MM-DD");
+                var nextclock=moment().add(10,'m').format("YYYY-MM-DD HH:mm");
+
                 var options = {
                     url: config.easy_pay.easy_pay_url,
                     method: 'POST',
@@ -40,6 +39,12 @@ var bulk = async (req, res, next) => {
                         'ApiKey': config.easy_pay.easy_pai_api_key
                     },
                     body: {
+                        "type":"sale",
+                        capture : {
+                            "capture_date" : today,
+                            "descriptive": "ANIECA"
+                        },
+                        "expiration_time": nextclock,
                         "value": element.value,
                         "method": "mb"
                     },
@@ -51,7 +56,7 @@ var bulk = async (req, res, next) => {
                     console.log(body)
                     if (error) {
                         console.log(err);
-                        return res.status(500).json({ message: "Error generating EasyPay reference" });
+                        // return res.status(500).json({ message: "Error generating EasyPay reference" });
                     } else if (response.statusCode === 201) {
                         var entity = body.method.entity
                         var reference = body.method.reference
@@ -64,14 +69,14 @@ var bulk = async (req, res, next) => {
                         dbHandlers.Qgen_reservations.Qpatch_reservationArray({ idEasyPay }, element.idReservation, (error) => { // Unlocks reservation
                             if (error) {
                                 console.log(error);
-                                return res.status(500).json({ message: 'There was an error while trying to update the reservation (idEasyPay).' });
+                                // return res.status(500).json({ message: 'There was an error while trying to update the reservation (idEasyPay).' });
                             } else {
                                 console.log('done');
                                 // TODO ainda é para enviar através do examcenter?
-                                dbHandlers.Qgen_exam_center.Qget_smtpCredencials(req.params.idExam_center, (err, smtpResults) => {
+                                dbHandlers.Qgen_exam_center.Qget_smtpCredencials(element.Exam_center_idExam_center, (err, smtpResults) => {
                                     if (err || smtpResults <= 0) {
                                         console.log(err);
-                                        return res.status(500).json({ message: "Error creating pendent payment" });
+                                        // return res.status(500).json({ message: "Error creating pendent payment" });
                                     } else {
                                         // // create reusable transporter object using the default SMTP transport
                                         let transporter = nodemailer.createTransport({
@@ -88,13 +93,12 @@ var bulk = async (req, res, next) => {
                                         });
 
                                         // get receiver info from school.permit
-                                        dbHandlers.Qgen_school.Qget_byPermitSchool_Exam_Center(element.School_permit, req.params.idExam_center, async (err, school_info) => {
+                                        dbHandlers.Qgen_school.Qget_byPermitSchool_Exam_Center(element.School_permit, element.Exam_center_idExam_center, async (err, school_info) => {
                                             if (err || school_info <= 0) {
                                                 console.log(err);
-                                                return res.status(500).json({ message: "Error getting school email" });
+                                                // return res.status(500).json({ message: "Error getting school email" });
                                             }
                                             var toEmail = school_info[0].Email1 || school_info[0].Email2
-
 
                                             var text = '\nEntidade: ' + entity +
                                                 '\nReferência: ' + reference +
@@ -124,7 +128,7 @@ var bulk = async (req, res, next) => {
                                             //send mail with defined transport object
                                             let info = await transporter.sendMail({
                                                 from: '"ANIECA" <' + smtpResults[0].SMTP_user + '>', // sender address
-                                                to: 'da.moura@campus.fct.unl.pt', // TODO change to toEmail
+                                                to: 'rui.branco@knowledgebiz.pt', // TODO change to toEmail
                                                 subject: 'Referência MB',
                                                 text, // plain text body
                                                 html, // html body
@@ -134,8 +138,8 @@ var bulk = async (req, res, next) => {
                                                     cid: 'logo'
                                                 }]
                                             });
-                                            console.log(info)
-                                            return res.status(200).json({ message: 'MB references sent.' });
+                                            console.log(info);
+                                            // return res.status(200).json({ message: 'MB references sent.' });
 
                                         })
                                     }
@@ -145,9 +149,12 @@ var bulk = async (req, res, next) => {
                     };
                 });
             });
+        }else{
+            // no pending reservations to be send
+            console.log("No reservations pending for easy pay");
         };
-    })
-}
+    });
+};
 
 var updateMissingPayments = (req, res, next) => {
     var options = {
@@ -322,6 +329,7 @@ var POST_easyPay = (req, res, next) => {
 }
 
 module.exports = {
+    bulk,
     updateMissingPayments,
     POST_easyPay
 } 

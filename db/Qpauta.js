@@ -29,16 +29,41 @@ var Qget_byId_Exam_Center_Pauta = (idpauta,idexam_center,cb)=>{
 };
 
 var Qget_byIdPauta = (idpauta,cb)=>{
-	return myQuery('SELECT Pauta.*,Timeslot.* FROM Pauta,Timeslot ' +
-				'WHERE Pauta.Timeslot_idTimeslot=Timeslot.idTimeslot '+
-				'AND Pauta.idPauta = ? LIMIT 1',[idpauta],
-					(error, results, fields)=> {
+	return myQuery('SELECT Pauta.*,Timeslot.*, Student.*, Examiner.*, Exam_route.Route,Exam_type.Short,school.permit, exam.idExam FROM Pauta '+
+				'LEFT JOIN Timeslot on Pauta.Timeslot_idTimeslot=Timeslot.idTimeslot '+
+			    'LEFT JOIN Booked on Booked.Timeslot_idTimeslot= Timeslot.idTimeslot '+
+			    'LEFT JOIN student_license on Booked.Student_license_idStudent_license= Student_license.idStudent_license '+
+			    'LEFT JOIN student on Student_license.Student_idStudent=Student.idStudent '+
+			    'LEFT JOIN Examiner_qualifications on Pauta.Examiner_qualifications_idExaminer_qualifications=Examiner_qualifications.idExaminer_qualifications '+
+				'LEFT JOIN Examiner on Examiner_qualifications.Examiner_idExaminer=Examiner.idExaminer '+
+				'LEFT JOIN Exam_route on Pauta.Exam_route_idExam_route=Exam_route.idExam_route '+
+				'LEFT JOIN Exam_type on Pauta.Exam_type_idExam_type=Exam_type.idExam_type '+
+				'LEFT JOIN School on student_license.School_idSchool=School.idSchool '+
+				'LEFT JOIN Exam on Exam.Booked_idBooked=Booked.idBooked '+
+				'WHERE Pauta.idPauta = ?',[idpauta],(error, results, fields)=> {
+		error ? cb(error) : cb(false,results);
+	});
+};
+
+var Qget_byNumPauta = (pauta_num,cb)=>{
+	return myQuery('SELECT Pauta.*,Timeslot.*,Student.*,Examiner.*,Exam_route.Route,Exam_type.Short,school.permit,exam.idExam FROM Pauta '+
+				'LEFT JOIN Timeslot on Pauta.Timeslot_idTimeslot=Timeslot.idTimeslot '+
+			    'LEFT JOIN Booked on Booked.Timeslot_idTimeslot= Timeslot.idTimeslot '+
+			    'LEFT JOIN student_license on Booked.Student_license_idStudent_license= Student_license.idStudent_license '+
+			    'LEFT JOIN student on Student_license.Student_idStudent=Student.idStudent '+
+			    'LEFT JOIN Examiner_qualifications on Pauta.Examiner_qualifications_idExaminer_qualifications=Examiner_qualifications.idExaminer_qualifications '+
+				'LEFT JOIN Examiner on Examiner_qualifications.Examiner_idExaminer=Examiner.idExaminer '+
+				'LEFT JOIN Exam_route on Pauta.Exam_route_idExam_route=Exam_route.idExam_route '+
+				'LEFT JOIN Exam_type on Pauta.Exam_type_idExam_type=Exam_type.idExam_type '+
+				'LEFT JOIN School on student_license.School_idSchool=School.idSchool '+
+				'LEFT JOIN Exam on Exam.Booked_idBooked=Booked.idBooked '+
+				'WHERE Pauta.Pauta_num = ?',[pauta_num],(error, results, fields)=> {
 		error ? cb(error) : cb(false,results);
 	});
 };
 
 var Qget_byTimeslotPauta = (idtimeslot,cb)=>{
-	return myQuery('SELECT * FROM PAUTA WHERE Timeslot_idTimeslot=? LIMIT 1',[idtimeslot],
+	return myQuery('SELECT * FROM Pauta WHERE Timeslot_idTimeslot=? LIMIT 1',[idtimeslot],
 					(error, results, fields)=> {
 		error ? cb(error) : cb(false,results);
 	});
@@ -130,6 +155,7 @@ module.exports = function(myQuery){
 		Qget_byExam_Center_AllPautas,
 		Qget_byId_Exam_Center_Pauta,
 		Qget_byIdPauta,
+		Qget_byNumPauta,
 		Qget_byTimeslotPauta,
 		Qget_byPauta_num_Pauta,
 		Qget_MAXPautaNum,

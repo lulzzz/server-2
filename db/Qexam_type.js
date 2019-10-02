@@ -5,7 +5,7 @@ var Qget_byIdExam_type =(id, cb)=>{
 						'WHERE Exam_type.idExam_type=Exam_price.Exam_type_idExam_type '+
 						'AND Exam_type.Type_category_idType_category=Type_category.idType_category '+
 						'AND Exam_price.T_Tax_idT_Tax=T_Tax.idT_Tax '+
-						'AND idExam_type = ?',[id], (error, results, fields) =>{
+						'AND Exam_type.idExam_type = ?',[id], (error, results, fields) =>{
 		error ? cb(error) : cb(false,results);
 	});
 };

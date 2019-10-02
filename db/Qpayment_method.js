@@ -5,6 +5,13 @@ var Qget_AllPaymentMethod = (cb) => {
     });
 };
 
+var Qget_SpecialOfferIDPaymentMethod = (cb) => {
+    return myQuery("SELECT idPayment_method FROM Payment_method WHERE Name='Vale Oferta'", 
+                null,(error,results,fields) => {
+        error ? cb(error) : cb(false,results);
+    });   
+};
+
 var Qcreate_PaymentMethod = (values, cb) => {
     return myQuery("INSERT INTO Payment_method (Name) VALUES (?)",[values],(error,results,fields)=>{
         error ? cb(error) : cb(false,results);
@@ -27,6 +34,7 @@ var Qpatch_PaymentMethod = (id, values, cb) => {
 module.exports = (myQuery) => {
     return {
         Qget_AllPaymentMethod,
+        Qget_SpecialOfferIDPaymentMethod,
         Qcreate_PaymentMethod,
         Qdelete_PaymentMethod,
         Qpatch_PaymentMethod

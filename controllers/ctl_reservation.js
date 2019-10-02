@@ -152,61 +152,68 @@ var postList_Reservations=async(req,res)=>{
 			if (!req.body.Block_number || (req.body.Block_number !== 2 && req.body.Block_number !== 1)) {
 				return res.status(400).json({message:"Bad request"});
 			}
-			// Gets timeslot
-			dbHandlers.Qgen_timeslot.Qget_timeslotById(req.body.idTimeslot, req.params.idExam_center,
-						async(error, timeslot)=>{
+			dbHandlers.Qgen_exam_status.Qget_byProcessCancelID(0,(error,idcancel)=>{
 				if (error) {
 					console.log(error);
-					return res.status(500).json({message: 'There was an error while trying to get information about the timeslot.'});
-				}
-				if (timeslot.length === 0) {
-					return res.status(400).json({message: 'Timeslot not found.'});
-				}
-				// It is possible to add reservations
-				if (timeslot[0].number_Reservations + req.body.Block_number <= timeslot[0].Max_Num_Students) {
-					dbHandlers.Qgen_exam_status.Qget_byProcessReservationID(0,(err,idpending)=>{
-						if(err){
-							console.log(err);
-							return res.status(500).json({message: 'Database error fetching reservation pending id'});
+					reject(error);
+				}else{
+					// Gets timeslot
+					dbHandlers.Qgen_timeslot.Qget_timeslotById(idcancel[0].idexam_status,req.body.idTimeslot, req.params.idExam_center,
+								async(error, timeslot)=>{
+						if (error) {
+							console.log(error);
+							return res.status(500).json({message: 'There was an error while trying to get information about the timeslot.'});
+						}
+						if (timeslot.length === 0) {
+							return res.status(400).json({message: 'Timeslot not found.'});
+						}
+						// It is possible to add reservations
+						if (timeslot[0].number_Reservations + req.body.Block_number <= timeslot[0].Max_Num_Students) {
+							dbHandlers.Qgen_exam_status.Qget_byProcessReservationID(0,(err,idpending)=>{
+								if(err){
+									console.log(err);
+									return res.status(500).json({message: 'Database error fetching reservation pending id'});
+								}else{
+									if (req.body.Block_number === 1) {
+										// Adds reservation
+										// Locked reservation will expire in 1 hour
+										dbHandlers.Qgen_reservations.Qpost_reservations([ 
+											req.body.idTimeslot,
+											req.user.user,
+											new Date(new Date().getTime() + 3600000), 
+											timeslot[0].Exam_type_idExam_type,
+											idpending[0].idexam_status
+										], (error,blocked) => { // Add reservations
+											if (error) {
+												console.log(error);
+												return res.status(500).json({message: 'There was as error while trying to block reservations.'});
+											}else{
+												return res.status(200).json(blocked);
+											};
+										});
+									};
+									if (req.body.Block_number === 2) {
+										dbHandlers.Qgen_reservations.Qpost_pairReservations([ // Adds reservation
+											req.body.idTimeslot,
+											req.user.user,
+											new Date(new Date().getTime() + 3600000),
+											timeslot[0].Exam_type_idExam_type,
+											idpending[0].idexam_status
+										], (error,blocked) => { // Add reservations
+											if (error) {
+												console.log(error);
+												return res.status(500).json({message: 'There was as error while trying to block reservations.'});
+											}else{
+												return res.status(200).json(blocked);	
+											};
+										});
+									};
+								};
+							});
 						}else{
-							if (req.body.Block_number === 1) {
-								// Adds reservation
-								// Locked reservation will expire in 1 hour
-								dbHandlers.Qgen_reservations.Qpost_reservations([ 
-									req.body.idTimeslot,
-									req.user.user,
-									new Date(new Date().getTime() + 3600000), 
-									timeslot[0].Exam_type_idExam_type,
-									idpending[0].idexam_status
-								], (error,blocked) => { // Add reservations
-									if (error) {
-										console.log(error);
-										return res.status(500).json({message: 'There was as error while trying to block reservations.'});
-									}else{
-										return res.status(200).json(blocked);
-									};
-								});
-							};
-							if (req.body.Block_number === 2) {
-								dbHandlers.Qgen_reservations.Qpost_pairReservations([ // Adds reservation
-									req.body.idTimeslot,
-									req.user.user,
-									new Date(new Date().getTime() + 3600000),
-									timeslot[0].Exam_type_idExam_type,
-									idpending[0].idexam_status
-								], (error,blocked) => { // Add reservations
-									if (error) {
-										console.log(error);
-										return res.status(500).json({message: 'There was as error while trying to block reservations.'});
-									}else{
-										return res.status(200).json(blocked);	
-									};
-								});
-							};
+							return res.status(400).json({message: 'It isn\'t possible to add more students to this slot. Limit has been reached.'});
 						};
 					});
-				}else{
-					return res.status(400).json({message: 'It isn\'t possible to add more students to this slot. Limit has been reached.'});
 				};
 			});
 		}else{ // Add reservations
@@ -254,7 +261,8 @@ var postList_Reservations=async(req,res)=>{
 									if (err || price.length <= 0) {
 										return res.status(500).json({ message: "Error getting exam price" });
 									} else {
-										dbHandlers.Qgen_pendent_payments.Qcreate_PendentPayment_reservation(price[0].Value, reservations[0].idReservation, (err, results) => {
+										dbHandlers.Qgen_pendent_payments.Qcreate_PendentPayment_reservation(price[0].Value, reservations[0].idReservation, 
+														(err, results) => {
 											if (err) {
 												console.log(err);
 												return res.status(500).json({ message: "Error creating pendent payment" });

@@ -3,7 +3,7 @@ var bodyParser = require('body-parser');
 var http = require("http");
 const path= require('path');
 const cors=require('cors');
-
+var schedule = require('node-schedule');
 // -------------------------------------
 var controllers = require("./controllers");
 var passport=require('passport');
@@ -13,8 +13,19 @@ const publicPath=path.join(__dirname, '../public');
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
-var config=require('./config.json');
-var port=process.env.PORT || config.backend.port;
+var config = require('./config.json');
+var port = process.env.PORT || config.backend.port;
+
+var rule = new schedule.RecurrenceRule();
+// rule.dayOfWeek = [0, 6];
+rule.hour = 16;
+rule.minute = 42;
+rule.dayOfWeek = [0, new schedule.Range(0, 6)];
+
+var j = schedule.scheduleJob(rule, function(){
+  console.log('EasyPay pending reservations');
+  controllers.easyPay.bulk();
+});
 
 var app = express();
 var server = http.createServer(app);

@@ -149,14 +149,14 @@ var Qget_byIdEasyPay = (idEasyPay, cb) => {
 
 // get easyPay references that don't have a payment
 var Qget_reservationWithouthEasyPayId = (cb) => {
-    return myQuery('SELECT idReservation, Exam_price, School_permit FROM anieca.reservation ' + 
+    return myQuery('SELECT idReservation, Exam_price, School_permit, Timeslot.Exam_center_idExam_center FROM anieca.reservation ' + 
         'Inner join anieca.pendent_payments on pendent_payments.Reservation_idReservation = reservation.idReservation ' + 
-        'inner join temp_student on temp_student.Reservation_idReservation = reservation.idReservation ' + 
-        'where reservation.idEasypay IS NULL AND reservation.Lock_expiration_date IS NULL', (error, results, fields) => {
+        'inner join temp_student on temp_student.Reservation_idReservation = reservation.idReservation ' +
+        'left join timeslot on reservation.Timeslot_idTimeslot = Timeslot.idTimeslot ' +
+        'where reservation.idEasypay IS NULL AND reservation.Lock_expiration_date IS NULL', [null],(error, results, fields) => {
             error ? cb(error) : cb(false, results);
     });
 };
-
 
 var Qpost_reservations = (object, cb) => {
     return myQuery('INSERT INTO `reservation` (`Timeslot_idTimeslot`,`Account_User`,`Lock_expiration_date`,'+
@@ -170,8 +170,15 @@ var Qpost_pairReservations = (object, cb) => {
         error ? cb(error) : cb(false,results);
     });
 };
+
 var Qpatch_reservation = (object, id, cb) => {
     return myQuery("UPDATE reservation SET ? WHERE idReservation=?", [object, id], (error,results,fields) => {
+        error ? cb(error) : cb(false,results)
+    });
+};
+
+var Qpatch_reservationArray = (object, id, cb) => {
+    return myQuery("UPDATE reservation SET ? WHERE idReservation IN (?);", [object, id], (error,results,fields) => {
         error ? cb(error) : cb(false,results)
     });
 };
@@ -232,6 +239,7 @@ module.exports = (myQuery) => {
         Qget_reservationWithouthEasyPayId,
         Qpost_reservations,
         Qpatch_reservation,
+        Qpatch_reservationArray,
         Qpatch_Cancelreservation,
         Qpatch_Pendentreservation,
         Qdelete_lockedExpiredReservationsByIdTimeslot,

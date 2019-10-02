@@ -14,13 +14,23 @@ var getList_Pauta_Exam_Center = (req,res,next)=>{
 					console.log(err);
 					res.status(500).json({message:"Error getting Pautas"});
 				}else if(results.length<=0){
-					// console.log("No content id " + results);
 					res.status(204).json({message:"No results"});	
 				}else{
-					// console.log(results);
 					res.status(200).json(results);
 				};
-			});	
+			});
+		}else if (req.query.Pauta_num){
+			//get pauta by number
+			dbHandlers.Qgen_pauta.Qget_byNumPauta(req.query.Pauta_num,(err,results)=>{
+				if(err){
+					console.log(err);
+					res.status(500).json({message:"Error getting Pautas"});
+				}else if(results.length<=0){
+					res.status(204).json({message:"No results"});	
+				}else{
+					res.status(200).json(results);
+				};
+			});
 		}else{
 			//getAll by exam center
 			dbHandlers.Qgen_pauta.Qget_byExam_Center_AllPautas(req.params.idExam_center,(err,results)=>{
@@ -46,7 +56,6 @@ var getList_Pauta_Exam_Center = (req,res,next)=>{
 				console.log("No content all " + results);
 				res.status(204).json({message:"No results"});	
 			}else{
-				// console.log(results);
 				res.status(200).json(results);
 			};
 		});
@@ -57,13 +66,11 @@ var getList_Pauta_Exam_Center = (req,res,next)=>{
 var P_create_pauta= async (values) => {
 	return await new Promise((resolve,reject)=>{
 		try{
-			// console.log("pauta launch")
 			dbHandlers.Qgen_pauta.Qcreate_Pauta(values,(err,results)=>{
 				if (err){
 					console.log(err);
 					reject(err);
 				}else{
-					// console.log(values);
 	  				resolve();
 				};
 	  		});		
@@ -183,6 +190,19 @@ var deletePauta = (req,res,next)=>{
 	};
 };
 
+// Update Exam Results
+var P_exam_result = async (element)=>{
+	return await new Promise ((resolve,reject)=>{
+		dbHandlers.Qgen_exam.Qupdate_Exam_result(element.idExam,element.T_exam_results_idT_exam_results,(e,result)=>{
+			if(e){
+				reject();
+			}else{
+				resolve();
+			};
+		});
+	});
+};
+
 // RANDOMIZES
 // -------------------------------------------------------------------------------------------
 var P_check_array= async(array,element)=>{
@@ -246,8 +266,6 @@ var P_randomize_examiners = async(idexam_center,timeslots,date,time)=>{
 		};
 	});
 };
-
-
 
 // var P_patch_examiner = async(values)=>{
 // 	return await new Promise((resolve,reject)=>{
@@ -340,10 +358,8 @@ var P_patch_route = async(values)=>{
 };
 
 // check exams balance of a given school for theorical free exams
-var Check_balance = async (idbooking,idexam_type,exam_price,cb)=>{
-
+var Check_balance = async (idbooking,idexam_type,cb)=>{
 	dbHandlers.Qgen_booked.Qget_byIdBooking(idbooking,(e,book)=>{
-		// book.Exam_center_idExam_center
 		if (e){
 			cb(false);
 		}else{
@@ -369,8 +385,22 @@ var Check_balance = async (idbooking,idexam_type,exam_price,cb)=>{
 										if(e){
 											cb(false);	
 										}else{
-											// TODO CREATE TRANSACTION WITH SPECIAL OFFER
-											
+											dbHandlers.Qgen_payment_method.Qget_SpecialOfferIDPaymentMethod((e,id_offer)=>{
+												if(e){
+													cb(false);		
+												}else{
+													let today_date=moment().format('YYYY-MM-DD');
+													dbHandlers.Qgen_transactions.Qcreate_Transactions(null,exam_type[0].Price,
+																today_date,book[0].Exam_center_idExam_center,book[0].idSchool,
+																id_offer[0].idPayment_method,null,null,(e)=>{
+														if(e){
+															cb(false);
+														}else{
+															cb(true);
+														}
+													});
+												};
+											});
 										};
 									});
 								}else if (balance[0].Balance_count<config.special_offers.TM_exams){
@@ -393,12 +423,6 @@ var Check_balance = async (idbooking,idexam_type,exam_price,cb)=>{
 			});
 		};	
 	});
-
-		
-
-
-
-
 };
 
 // -------------------------------------------------------------------------------------------
@@ -548,6 +572,25 @@ var updatePauta = async (req,res,next)=>{
 					return res.status(200).json({message:"Pauta updated."});		
 				};
 			});
+		// update results for given pauta
+		}else if(req.query.Result){
+			if (req.body.results.length>0){
+				let arr_patch_results=[];
+				req.body.results.forEach((element)=>{
+							arr_patch_results.push(P_exam_result(element));
+						});
+						Promise.all(arr_patch_results)
+	        				.then(()=>{
+								return res.status(200).json({message:"Results updated in pauta."});
+							}).catch((err)=> {
+				                // log that I have an error, return the entire array;
+				                console.log(err);
+				                return res.status(500).json({message:"Database error updating results in pauta."});
+	        				});	
+
+			}else{
+				return res.status(204).json({message:"No content"});	
+			};
 		};
 	// randomize examiner and route for starting timeslots
 	}else if(req.query.start && req.body.Exam_center_idExam_center){
@@ -574,19 +617,6 @@ var updatePauta = async (req,res,next)=>{
 		                console.log(err);
 		                return res.status(500).json({message:"Database error randomizing examiners"});
     				});
-				// -----------------------------------------------------
-				// var arr_examiner=[];
-				// timeslots.forEach((element)=>{
-				// 	arr_examiner.push(P_patch_examiner(element));
-				// });
-				// Promise.all(arr_examiner)
-			    // 				.then(()=>{
-			    // 					// everything went ok
-				// 	}).catch((err)=>{
-	   			//              // log that I have an error, return the entire array;
-			    //               console.log(err);
-			    //               return res.status(500).json({message:"Database error randomizing examiners"});
-    			// 				});
 				// -----------------------------------------------------
 				// Randomize routes for given timeslots
 				var arr_routes=[];
@@ -660,19 +690,3 @@ module.exports = {
 	deletePauta,
 	updatePauta
 }
-
-// function P_get_exams(timeslots,cb){
-// 	var arr_exams = [];
-// 	timeslots.foreach((element)=>{
-// 		console.log(timeslots[element]);
-// 		dbHandlers.Qgen_examiner_qualification.Qget_Active_Examiner_qualification(
-// 					req.body.Exam_center_idExam_center,(err,qualifications)=>{
-// 			if (err || qualifications.length<=0){
-// 				console.log(err);
-// 				res.status(500).send({message:"No examiners available"});	
-// 			}else{
-// 				console.log(qualifications);
-// 			}
-// 		});
-// 	});
-// };

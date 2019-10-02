@@ -59,7 +59,7 @@ module.exports = {
 	Qgen_delegation:require("./QT_delegation")(myQuery),
 	Qgen_bank:require("./Qbanks")(myQuery),
 	Qgen_tax:require("./QT_tax")(myQuery),
-	Qgen_payment_method:require("./QPayment_method")(myQuery),
+	Qgen_payment_method:require("./Qpayment_method")(myQuery),
 	Qgen_payment:require("./Qpayment")(myQuery),
 	Qgen_reservations:require("./Qreservations")(myQuery),
 	Qgen_groups:require("./Qgroups")(myQuery),

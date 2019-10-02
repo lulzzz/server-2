@@ -60,7 +60,7 @@ var Qget_not_numbered_exams = (idexam_center,cb)=>{
 
 // get max exam number
 var Qget_MAXExamNum=(idexam_center,cb)=>{
-	return myQuery('SELECT IFNULL(MAX(Exam_num),1) AS Exam_num FROM Exam '+
+	return myQuery('SELECT IFNULL(MAX(Exam.Exam_num),1) AS Exam_num FROM Exam '+
 					'LEFT JOIN booked ON exam.Booked_idBooked=Booked.idBooked '+
 					'WHERE Booked.Exam_center_idExam_center=? Limit 1',[idexam_center],(error, results, fields)=>{
 		error ? cb(error) : cb(false,results);
@@ -106,6 +106,13 @@ var Qupdate_Exam_SiccStatus=(id,operation,cb)=>{
 	});
 };
 
+var Qupdate_Exam_result=(id,idresult,cb)=>{
+	return myQuery("UPDATE exam SET T_exam_results_idT_exam_results = ? "+
+					"WHERE idExam = ?",[idresult,id],(error, results,fields)=>{
+		error ? cb(error) : cb(false,results);	
+	});	
+};
+
 // -----------------------------------ADVANCE SEARCH------------------------------------------
 var Qget_search=(query,values,cb)=>{
 	let customQuery='SELECT Exam.*,Booked.*,Student_license.*,School.*,Student.*,Timeslot.*,Pauta.* '+
@@ -136,6 +143,7 @@ module.exports = function(myQuery){
 		Qupdate_byIdExam,
 		Qupdate_ExamNumber,
 		Qupdate_Exam_SiccStatus,
+		Qupdate_Exam_result,
 		Qget_search
 	}
 }

@@ -6,20 +6,20 @@ var getSiccStatus = (req,res,next) =>{
     dbHandlers.Qgen_sicc_status.Qget_byProcessSicc_status(req.query.Process,(err, results) =>{
       if(err){
         console.log(err);
-        res.status(500).send({message:"Database error getting exam status list by process"});
+        res.status(500).send({message:"Database error getting sicc status list by process"});
       }else{
         res.status(200).json(results);
       };
     });
   }else{
-    // dbHandlers.Qgen_exam_status.Qget_AllExam_Status((err, results) =>{
-    //   if(err){
-    //     console.log(err);
-    //     res.status(500).send({message:"Database error getting exam status list"});
-    //   }else{
-    //     res.status(200).json(results);
-    //   };
-    // });
+    dbHandlers.Qgen_sicc_status.Qget_Sicc_status((err, results) =>{
+      if(err){
+        console.log(err);
+        res.status(500).send({message:"Database error getting sicc status list"});
+      }else{
+        res.status(200).json(results);
+      };
+    });
   };
 };
 

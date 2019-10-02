@@ -13,6 +13,13 @@ var config=require('../config.json');
 // };
 
 //get sicc Status by process
+var Qget_Sicc_status = (cb) =>{
+  return myQuery('SELECT * FROM T_sicc_status',[null],(error, results, fields) =>{
+    error ? cb(error): cb(false,results)
+  });
+};
+
+//get sicc Status by process
 var Qget_byProcessSicc_status = (Process,cb) =>{
   return myQuery('SELECT * FROM T_sicc_status WHERE process = ?',[Process],
               (error, results, fields) =>{
@@ -52,6 +59,7 @@ var Qupdate_byIdSicc_status = (values,id,cb) =>{
 
 module.exports = (myQuery) => {
   return {
+    Qget_Sicc_status,
     Qget_byProcessSicc_status,
     Qget_byProcess_Operation_Sicc_status,
     Qcreate_Sicc_status,
