@@ -122,6 +122,17 @@ var Qcreate_Booking=(values,cb)=>{
 	});
 };
 
+// put record in bookings given exam_center id
+var Qcreate_byReservationBooking=(values,cb)=>{
+	return myQuery('INSERT INTO Booked (Booked_date,Obs,Student_license_idStudent_license,'+
+							'Timeslot_idTimeslot,Account_idAccount,Exam_center_idExam_center,'+
+							'Exam_type_idExam_type,T_exam_status_idexam_status, '+
+							'sicc_status_idsicc_status,Reservation_idReservation) '+
+							'values (?)',[values],(error, results, fields)=> {
+		error ? cb(error) : cb(false,results);	
+	});
+};
+
 // delete record by id in bookings
 var Qdelete_byIdBooking=(id,cb)=>{
 	return myQuery('DELETE FROM Booked WHERE idBooked = ?',[id],(error, results,fields)=>{
@@ -183,6 +194,7 @@ module.exports = function(myQuery){
 		Qget_nextPautaNum,
 		Qget_ValuesCreateExam,
 		Qcreate_Booking,
+		Qcreate_byReservationBooking,
 		Qdelete_byIdBooking,
 		Qupdate_byIdBooking,
 		Qupdate_Booking_ExamNum,

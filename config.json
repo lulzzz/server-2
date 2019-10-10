@@ -12,7 +12,7 @@
 		"jwt_secret":"qwesdkfhsdlfjxcv"
 	},
 	"time_window":{
-		"minutes":59
+		"minutes":70
 	},
 	"process_names":{
 		"Reservations":"Reservas",

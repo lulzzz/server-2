@@ -25,11 +25,8 @@ module.exports = {
 			//create account
 			// control variables not mandatories
 			let temp_idExam_center;
-			// if (req.body.Exam_center_idExam_center){
 			temp_idExam_center=req.body.Exam_center_idExam_center;
-			// }else{
-			// 	temp_idExam_center=null;
-			// };
+
 			let user_name;
 			if (req.body.user_name){
 				user_name=req.body.user_name;
@@ -51,7 +48,7 @@ module.exports = {
 				}else{
 					dbHandlers.Qgen_accounts.Qcreate_Account([req.body.user,hash,salt,
 									user_name,user_email,1,createdate,null,1,
-									req.body.Exam_center_idExam_center,exam_center.Exam_center_name,
+									req.body.Exam_center_idExam_center,exam_center[0].Exam_center_name,
 									req.body.role.idRole],(e,r)=>{
 						if(e){
 							if(e.code == "ER_DUP_ENTRY"){
@@ -101,11 +98,13 @@ module.exports = {
 								console.log({user:req.body.user,
 											idExam_center:acc.Exam_center_idExam_center,
 											Exam_center_name:acc.Exam_center_name,
+											idSchool:acc.School_idSchool,
 											Functionality:actions,
 											token: token});	
-								res.status(200).json({user:req.body.user,
+								return res.status(200).json({user:req.body.user,
 											idExam_center:acc.Exam_center_idExam_center,
 											Exam_center_name:acc.Exam_center_name,
+											idSchool:acc.School_idSchool,
 											Functionality:actions,
 											token: token});
 		    				});	
@@ -113,9 +112,9 @@ module.exports = {
 					});
 					
 				}else{
-					res.status(401).json(info);
-					// res.status(401).send({message:"error"});
-				}
+					console.log(info);
+					return res.status(401).json();
+				};
 			})(req,res);
 		};
 	}

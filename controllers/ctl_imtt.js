@@ -682,7 +682,7 @@ var POST_sicc= async (req,res,next)=>{
                                 });
                             };
                         };
-                        res.send(fileRows)
+                        res.send(fileRows);
                     };
                 };
             });

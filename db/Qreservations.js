@@ -158,6 +158,15 @@ var Qget_reservationWithouthEasyPayId = (cb) => {
     });
 };
 
+// get car plate from reservation
+var Qget_byIdbooked_car_plate = (idbooking,cb)=>{
+    return myQuery('SELECT reservation.car_plate FROM booked,reservation '+
+                    'WHERE booked.Reservation_idReservation = Reservation.idReservation '+
+                    'AND booked.idBooked = ? LIMIT 1',[idbooking],(error, results, fields) => {
+            error ? cb(error) : cb(false, results);
+    });       
+};
+
 var Qpost_reservations = (object, cb) => {
     return myQuery('INSERT INTO `reservation` (`Timeslot_idTimeslot`,`Account_User`,`Lock_expiration_date`,'+
                 'Exam_type_idExam_type,T_exam_status_idexam_status) VALUES (?)', [object], (error,results,fields) => {
@@ -237,6 +246,7 @@ module.exports = (myQuery) => {
         Qget_byTaxnumReservations,
         Qget_byIdEasyPay,
         Qget_reservationWithouthEasyPayId,
+        Qget_byIdbooked_car_plate,
         Qpost_reservations,
         Qpatch_reservation,
         Qpatch_reservationArray,

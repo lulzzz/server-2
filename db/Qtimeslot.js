@@ -43,6 +43,13 @@ var Qget_TimeslotInDateTime = (Exam_date, idExam_center, Exam_group, cb) => {
     });
 };
 
+var Qget_byIdTimeslot = (idtimeslot,cb)=>{
+    return myQuery('SELECT * FROM Timeslot WHERE idTimeslot=? LIMIT 1',[idtimeslot],(error,results,fields) => {
+        error ? cb(error) : cb(false,results);
+    });
+};
+
+
 var Qget_timeslotById = (idcancel,id, idExam_center, cb) => {
     return myQuery("SELECT Timeslot.*, Num_Students as Max_Num_Students, " +
                 "count(if(reservation.T_exam_status_idexam_status !=?,1,null)) as number_Reservations " +
@@ -52,6 +59,26 @@ var Qget_timeslotById = (idcancel,id, idExam_center, cb) => {
                 "GROUP BY Timeslot.idTimeslot",[idcancel,id, idExam_center], (error,results,fields) => {
         error ? cb(error) : cb(false,results);
     });
+};
+
+var Qget_countTimeslot = (idexam_center, date, time, cb) => {
+  return myQuery(
+    "SELECT examiner_qualifications.*,timeslot.idtimeslot," +
+      " count(idtimeslot) as numero FROM examiner_qualifications, Examiner,exam_type,timeslot,pauta" +
+      " WHERE examiner_qualifications.Examiner_idExaminer = Examiner.idExaminer" +
+      " AND examiner_qualifications.Exam_type_idExam_type=Exam_type.idExam_type" +
+      " AND Exam_type.idExam_type=timeslot.Exam_type_idExam_type" +
+      " AND Pauta.Timeslot_idTimeslot = Timeslot.idTimeslot" +
+      " AND Pauta.Examiner_qualifications_idExaminer_qualifications IS NULL" +
+      " AND Examiner.Exam_center_idExam_center = ? AND Examiner.active=1" +
+      " AND timeslot.Timeslot_date=? AND timeslot.Begin_time<=?" +
+      " group by idtimeslot" +
+      " ORDER BY numero ASC",
+    [idexam_center, date, time],
+    (error, results, fields) => {
+      error ? cb(error) : cb(false, results);
+    }
+  );
 };
 
 // creates timeslot
@@ -80,9 +107,11 @@ module.exports = function(myQuery){
 	return {
 		Qget_byDateTimeslot,
 		Qget_nextTimeslot,
+        Qget_byIdTimeslot,
 		Qget_timeslotByWeek,
 		Qget_TimeslotInDateTime,
 		Qget_timeslotById,
+        Qget_countTimeslot,
 		Qpost_timeslot,
 		Qdelete_timeslot,
 		Qpatch_timeslot

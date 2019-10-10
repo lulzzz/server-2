@@ -241,7 +241,8 @@ var postList_Reservations=async(req,res)=>{
 
 				dbHandlers.Qgen_reservations.Qpatch_reservation({ // Edits the reservation (Turns it into a real reservation)
 					Exam_type_idExam_type: req.body.Exam_type_idExam_type,
-					Lock_expiration_date: null
+					Lock_expiration_date: null,
+					Car_plate: req.body.Car_plate
 				}, reservations[0].idReservation, (error) => { // Unlocks reservation
 					if (error) {
 						console.log(error);
@@ -552,6 +553,19 @@ var patchList_Reservations=async(req,res)=>{
 	}else if(req.query.check){
 		// validates reservation and creates booking
 		if (req.body.idReservation){
+			// Promise to get account id
+			var P_account=new Promise((resolve,reject)=>{
+				dbHandlers.Qgen_accounts.Qget_byUserAccount(req.user.user,(e,account)=>{
+					if(err){
+						console.log(err);
+						return res.status(500).send({message:"Error getting account"});
+						reject();
+					}else{
+						resolve(account[0].idAccount);	
+					};	
+				});
+			});
+			var temp_account = await P_account.then();
 			// get reservation by id
 			dbHandlers.Qgen_reservations.Qget_byIdReservation(req.body.idReservation,(err,reservation)=>{
 				console.log("reservation "+ JSON.stringify(reservation))
@@ -604,10 +618,11 @@ var patchList_Reservations=async(req,res)=>{
 															return res.status(500).json({message:"Error fetching id exam status"});
 														}else{
 															// creates booking
-															dbHandlers.Qgen_booked.Qcreate_Booking([new Date(),reservation[0].Obs,
-																		tempstudent_license,reservation[0].idTimeslot,1,
+															dbHandlers.Qgen_booked.Qcreate_byReservationBooking([new Date(),reservation[0].Obs,
+																		tempstudent_license,reservation[0].idTimeslot,temp_account,
 																		req.params.idExam_center,reservation[0].Exam_type_idExam_type,
-																		id_status[0].idexam_status,id_sicc[0].idsicc_status],(err,results)=>{
+																		id_status[0].idexam_status,id_sicc[0].idsicc_status,
+																		req.body.idReservation],(err,results)=>{
 																if (err){
 																	console.log(err);
 																	return res.status(500).send({message:"Error creating booking"});

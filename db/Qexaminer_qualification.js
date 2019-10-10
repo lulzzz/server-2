@@ -6,12 +6,40 @@ var Qget_byIdExaminer_Examiner_qualification =(idexaminer, cb)=>{
 	});
 };
 
-var Qget_byIdExam_type_Examiner_qualification=(idexam_type,cb)=>{
+var Qget_byIdExam_type_Examiner_qualification=(idexam_center,idexam_type,cb)=>{
 	return myQuery('SELECT examiner_qualifications.idExaminer_qualifications,examiner.Examiner_name,examiner.Num '+
 					'FROM examiner_qualifications,examiner '+
 					'WHERE examiner_qualifications.Examiner_idExaminer = examiner.idExaminer '+
-        			'AND examiner_qualifications.Exam_type_idExam_type = ?',
-					[idexam_type],(error, results, fields)=>{
+					'AND examiner.Exam_center_idExam_center = ? '+
+        			'AND examiner_qualifications.Exam_type_idExam_type = ? '+
+        			'AND examiner_qualifications.Active = 1',
+					[idexam_center,idexam_type],(error, results, fields)=>{
+		error ? cb(error) : cb(false,results);
+	});	
+};
+
+var Qget_ForceAvailable=(idexam_center,idexam_type,day,time,cb)=>{
+		return myQuery('SELECT t2.quali, Examiner.Examiner_name,Examiner.License_num from (SELECT  t1.quali, count(*) as count '+ 
+				'FROM (SELECT Examiner_qualifications.idExaminer_qualifications AS quali '+
+					'FROM Examiner_qualifications,Examiner '+
+					'WHERE Examiner_qualifications.Examiner_idExaminer=Examiner.idExaminer '+
+					'AND Examiner.Exam_center_idExam_center = ? ' +
+					'AND Examiner_qualifications.active = 1 '+
+        			'AND Examiner_qualifications.Exam_type_idExam_type = ? '+
+ 					'UNION ALL SELECT '+
+    					'pauta.Examiner_qualifications_idExaminer_qualifications AS quali '+
+						'FROM Pauta,Timeslot '+
+						'WHERE Pauta.Timeslot_idTimeslot = Timeslot.idTimeslot '+
+						'AND Timeslot.Exam_center_idExam_center = ? '+
+        				'AND Timeslot.Timeslot_date = ? '+
+        				'AND Timeslot.Begin_time < ? '+
+        				'AND Timeslot.End_time > ? '+
+        				'AND pauta.Examiner_qualifications_idExaminer_qualifications is not null) as t1 '+
+        			'GROUP BY t1.quali '+
+					'HAVING COUNT(*) = 1) as t2, Examiner_qualifications,Examiner '+ 
+       		 	'WHERE t2.quali=Examiner_qualifications.idExaminer_qualifications '+
+        		'AND Examiner_qualifications.Examiner_idExaminer=Examiner.idExaminer',
+               	[idexam_center,idexam_type,idexam_center,day,time,time],(error, results, fields)=>{
 		error ? cb(error) : cb(false,results);
 	});	
 };
@@ -33,29 +61,19 @@ var Qget_Active_Examiner_qualification=(idexam_center,cb)=>{
 	});
 };
 
-var Qget_AvailableExaminer_Qualification=(idexam_center,date,time,cb)=>{
-	return myQuery('SELECT examiner_qualifications.*,timeslot.idtimeslot FROM examiner_qualifications, Examiner,exam_type,timeslot '+
-					'WHERE examiner_qualifications.Examiner_idExaminer = Examiner.idExaminer '+
-                    'AND examiner_qualifications.Exam_type_idExam_type=Exam_type.idExam_type '+
-                    'AND Exam_type.idExam_type=timeslot.Exam_type_idExam_type '+
-					'AND Examiner.Exam_center_idExam_center = ? AND Examiner.active=1 '+
-                    'AND Timeslot_date=? AND Begin_time<=? ORDER BY Exam_type_idExam_type ASC',
-					[idexam_center,date,time],(error, results, fields) => {
-		error ? cb(error) : cb(false,results);
-	});
+var Qget_AvailableExaminer_Qualification = (idexam_center,date,time,cb) => {
+  return myQuery(
+    "SELECT examiner_qualifications.*,timeslot.idtimeslot FROM examiner_qualifications, Examiner,exam_type,timeslot " +
+      "WHERE examiner_qualifications.Examiner_idExaminer = Examiner.idExaminer " +
+      "AND examiner_qualifications.Exam_type_idExam_type=Exam_type.idExam_type " +
+      "AND Exam_type.idExam_type=timeslot.Exam_type_idExam_type " +
+      "AND Examiner.Exam_center_idExam_center = ? AND Examiner.active=1 " +
+      "AND Timeslot_date=? AND Begin_time<=? ORDER BY idtimeslot ASC",
+    [idexam_center, date, time],(error, results, fields) => {
+      error ? cb(error) : cb(false, results);
+    }
+  );
 };
-
-
-// SELECT examiner_qualifications.*,timeslot.idtimeslot, count(idtimeslot) as 'numero' FROM examiner_qualifications, Examiner,exam_type,timeslot,pauta
-// 					WHERE examiner_qualifications.Examiner_idExaminer = Examiner.idExaminer 
-//                     AND examiner_qualifications.Exam_type_idExam_type=Exam_type.idExam_type 
-//                     AND Exam_type.idExam_type=timeslot.Exam_type_idExam_type
-//                     AND Pauta.Timeslot_idTimeslot = Timeslot.idTimeslot
-//                     AND Pauta.Examiner_qualifications_idExaminer_qualifications IS NULL 
-// 					AND Examiner.Exam_center_idExam_center = 4 AND Examiner.active=1 
-//                     AND timeslot.Timeslot_date='2019-09-04' AND timeslot.Begin_time<='10:45:00'  
-//                     group by idtimeslot 
-//                     ORDER BY numero ASC
 
 // put record in school given exam_center id
 var Qcreate_Examiner_qualification=(values,cb)=>{
@@ -88,6 +106,7 @@ module.exports = function(myQuery){
 		Qget_IdExaminer_qualification,
 		Qget_Active_Examiner_qualification,
 		Qget_AvailableExaminer_Qualification,
+		Qget_ForceAvailable,
 		Qcreate_Examiner_qualification,
 		Qdelete_byIdExaminer_qualification,
 		Qupdate_byIdExaminer_qualification

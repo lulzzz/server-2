@@ -2,6 +2,7 @@ var config=require('../config.json');
 var dbHandlers = require("../db");
 var moment = require('moment');
 var _=require('lodash');
+var hash = require("hashmap");
 
 // GET request for bookings
 var getList_Pauta_Exam_Center = (req,res,next)=>{
@@ -85,42 +86,49 @@ var P_create_pauta= async (values) => {
 var createPauta = async (req,res,next)=>{
 	if (!req.query.search){
 		if (req.params.idExam_center && req.body.Timeslot_date){
-			dbHandlers.Qgen_pauta.Qget_MAXPautaNum(req.params.idExam_center,(err,results)=>{
-				if (err){
-					console.log(err);
-					res.status(500).json({message:"Error getting pauta numbers"});	
+			dbHandlers.Qgen_accounts.Qget_byUserAccount(req.user.user,(e,account)=>{
+				if(e){
+					console.log(e);
+					return res.status(500).send({message:"Database error identifying account"});
 				}else{
-					var temp_pauta_num=results[0].pauta_num;
-					// console.log("got max pauta " +JSON.stringify(results));
-					dbHandlers.Qgen_timeslot.Qget_byDateTimeslot(req.params.idExam_center,
-							req.body.Timeslot_date,(err,results)=>{	
-							console.log("got timeslot date")
-						if (err || results.length<=0){
+					dbHandlers.Qgen_pauta.Qget_MAXPautaNum(req.params.idExam_center,(err,results)=>{
+						if (err){
 							console.log(err);
-							res.status(500).json({message:"No records found in database"});		
+							res.status(500).json({message:"Error getting pauta numbers"});	
 						}else{
-							// array of promises to create pautas
-							var array_P_pautas=[];
-							results.forEach((element)=>{
-								temp_pauta_num = temp_pauta_num + 1;
-								array_P_pautas.push(P_create_pauta([temp_pauta_num,element.idTimeslot,1,
-										element.Exam_type_idExam_type]));
-							});
-							Promise.all(array_P_pautas)
-	            				.then(()=>{
-									res.status(200).json({message:"Pautas created"});	
-								}).catch((err)=>{
-					                // log that I have an error, return the entire array;
-					                console.log(err);
-					                res.status(500).json({message:"Database error creating pautas"});
-	            				});				
+							var temp_pauta_num=results[0].pauta_num;
+							// console.log("got max pauta " +JSON.stringify(results));
+							dbHandlers.Qgen_timeslot.Qget_byDateTimeslot(req.params.idExam_center,
+									req.body.Timeslot_date,(err,results)=>{	
+									console.log("got timeslot date")
+								if (err || results.length<=0){
+									console.log(err);
+									res.status(500).json({message:"No records found in database"});		
+								}else{
+									// array of promises to create pautas
+									var array_P_pautas=[];
+									results.forEach((element)=>{
+										temp_pauta_num = temp_pauta_num + 1;
+										array_P_pautas.push(P_create_pauta([temp_pauta_num,element.idTimeslot,account.idAccount,
+												element.Exam_type_idExam_type]));
+									});
+									Promise.all(array_P_pautas)
+			            				.then(()=>{
+											res.status(200).json({message:"Pautas created"});	
+										}).catch((err)=>{
+							                // log that I have an error, return the entire array;
+							                console.log(err);
+							                res.status(500).json({message:"Database error creating pautas"});
+			            				});				
+								};
+							});		
 						};
-					});		
+					});
 				};
 			});
 		}else{
 			// missing id for this request
-			res.status(400).send({message:"Bad Request."});	
+			return res.status(400).send({message:"Bad Request."});	
 		};
 	}else{
 		var conditions = ['Timeslot.Exam_center_idExam_center = ?'];
@@ -215,100 +223,66 @@ var P_check_array= async(array,element)=>{
 	});
 };
 
-var Sort_examiner = async(idexam_center,timeslots,date,time,cb)=>{
-	// console.log(payments);
-	// dbHandlers.Qgen_examiner_qualification.Qget_AvailableExaminer_Qualification(idexam_center,date,time,(err,qualifications)=>{
-	// 	if (err || qualifications.length<=0){
-	// 		// no examiners available 
-	// 	}else{
-	// 		for (const cycles of timeslots.length){
-	// 			// query soma t (idtimeslots)=> {
-	// 				// for counts
-	// 			// 	if count=1
-	// 			// }
-
-
-	// 			var arr_count=[];
-	// 			for (const it of qualifications){
-	// 				if (typeof arr_count !== 'undefined' && arr_count.length > 0) {
- //    					// check if exam type is already in array
-	// 					P_check_array(arr_count,it.Exam_type_idExam_type);
-	// 					Promise.all(P_check_array)
-	//         				.then(()=>{
-	// 							resolve();	
-	// 						}).catch((err)=>{
-	// 			                // log that I have an error, return the entire array;
-	// 			                reject(err);
-	//         				});
-	// 					};
-	// 				};
-	// 			};	
-	// 		};
-	// 		// list of available examiners			
-	// 		// for (const it of timeslots){
-	// 		// }
-	// });
-	resolve(1);
+function randomize(colors) {
+	return colors[Math.floor(Math.random() * colors.length)];
 };
 
-var P_randomize_examiners = async(idexam_center,timeslots,date,time)=>{
-	return await new Promise((resolve,reject)=>{
-		try{
-			Sort_examiner(idexam_center,timeslots,date,time,(examiners)=>{
-				if(examiners){
-					resolve();
-				}else{
-					reject();
-				};
-			});
-		}catch (err){
-			return reject(err);
-		};
-	});
-};
+var P_randomize_examiners = async (idexam_center) => {
+	return await new Promise((resolve, reject) => {
+    	try {
+	    	var date_now = moment().format("YYYY-MM-DD").toString();
+	    	// console.log("DATE NOW" + date_now);
+	    	var time_now = moment().add(config.time_window.minutes, "m").format("H:mm:ss");
+	      	// console.log("TIME NOW" + time_now);
 
-// var P_patch_examiner = async(values)=>{
-// 	return await new Promise((resolve,reject)=>{
-// 		try{
-// 			dbHandlers.Qgen_exam_type.Qget_byIdExam_type(values.Exam_type_idExam_type,(err,exam_type)=>{
-// 				if(err || exam_type.length<=0){
-// 					reject(err);
-// 				}else{
-// 					dbHandlers.Qgen_examiner_qualification.Qget_Active_Examiner_qualification(
-// 								values.Exam_center_idExam_center,(err,qualifications)=>{
-// 						// console.log(JSON.stringify(qualifications));
-// 						if (err || qualifications.length<=0){
-// 							// console.log(err);
-// 							// res.status(500).send({message:"No examiners available"});
-// 							reject(err);	
-// 						}else{
-// 							var idexaminer = Math.floor(Math.random() * (qualifications.length - 0 ) + 0);
-// 							dbHandlers.Qgen_pauta.Qget_byTimeslotPauta(values.idTimeslot,(err,pauta)=>{
-// 								if (err){
-// 									reject(err);
-// 								}else if(pauta.length<=0){
-// 									resolve();	
-// 								}else{
-// 									dbHandlers.Qgen_pauta.Qupdate_Pauta_Examiner_qualifications(
-// 											qualifications[idexaminer].idExaminer_qualifications,
-// 											pauta[0].Pauta_num,(err,results)=>{
-// 										if (err){
-// 											reject(err);
-// 										}else{
-// 											resolve();
-// 										};
-// 									});
-// 								};
-// 							});
-// 						};
-// 					});
-// 				};
-// 			});
-// 		}catch (err){
-// 			return reject(err);
-// 		};
-// 	});
-// };
+	      	dbHandlers.Qgen_timeslot.Qget_countTimeslot(idexam_center,date_now,time_now,(err, timeslots) => {
+	         	if (err) {
+	            	console.log(err);
+	            	reject(err);
+	            	// return res.status(500).json({ message: "Error getting timeslots" });
+	          	} else if (timeslots.length <= 0) {
+	          		console.log("No timeslots found");
+	          		reject();
+	            	// return res.status(204).json({ message: "No timeslots found" });
+	          	} else {
+	            	dbHandlers.Qgen_examiner_qualification.Qget_AvailableExaminer_Qualification(idexam_center,date_now,time_now,
+	            						(error, availableExaminers) => {
+	                	if (error) {
+	                  		console.log(error);
+	                  		reject(error);
+	                  		// res.status(500).json({ message: "Error getting examiners" });
+	                	} else if (availableExaminers.length <= 0) {
+	                  		// res.status(204).json({ message: "No examiners found" });
+	                	} else {
+	                  		var examinersMap = new hash();
+	                  		for (let i = 0; i < timeslots.length; i++) {
+	                    		if (timeslots[i].numero == 1) {
+	                      			examinersMap.set(timeslots[i].idtimeslot,timeslots[i].Examiner_idExaminer);
+	                    		} else {
+	                      			var examinersList = new Array();
+	                      			for (let j = 0; j < availableExaminers.length; j++) {
+	                        			if (!examinersMap.has(availableExaminers[j].idtimeslot) &&
+	                          					examinersMap.search(availableExaminers[j].Examiner_idExaminer) == null) {
+	                        				if (availableExaminers[j].idtimeslot == timeslots[i].idtimeslot) {
+	                            				examinersList.push(availableExaminers[j].Examiner_idExaminer);
+	                          				};
+	                        			};
+	                      			};
+	                      			examinersMap.set(timeslots[i].idtimeslot,randomize(examinersList));
+	                    		};
+	                  		};
+                  			resolve(examinersMap.entries());
+                  			// console.log(JSON.stringify(examinersMap.entries()));
+                  			// res.status(200).json({message:" Examiners Sorted " + JSON.stringify(examinersMap.entries())});
+	                	};
+	              	});
+	          	};
+	        });
+	    } catch (err) {
+	    	return reject(err);
+	    };
+  	});
+};
 
 var P_patch_route = async(values)=>{
 	return await new Promise((resolve,reject)=>{
@@ -430,27 +404,34 @@ var Check_balance = async (idbooking,idexam_type,cb)=>{
 var P_create_exams = async(values) => {
 	return await new Promise((resolve,reject)=>{
 		try{
-			dbHandlers.Qgen_exam.Qcreate_Exam([values.Booked_idBooked,values.Account_idAccount,
-							values.Pauta_idPauta],async (err,exam)=>{
-				if(err){
-					reject(err);
+			// check if car plate already exists
+			dbHandlers.Qgen_reservations.Qget_byIdbooked_car_plate(values.Booked_idBooked,(e,licenseplate)=>{
+				if(e){
+					reject(e);
 				}else{
-					dbHandlers.Qgen_exam_price.Qget_price_tax_emit(values.Exam_type_idExam_type,async (err,price)=>{
+					dbHandlers.Qgen_exam.Qcreate_Exam([values.Booked_idBooked,values.Account_idAccount,
+									values.Pauta_idPauta,licenseplate.car_plate],async (err,exam)=>{
 						if(err){
 							reject(err);
 						}else{
-							dbHandlers.Qgen_pendent_payments.Qcreate_PendentPayment_tax(price.Value,
-									values.Booked_idBooked,values.Student_license_idStudent_license,
-									async (err,tax) => {
+							dbHandlers.Qgen_exam_price.Qget_price_tax_emit(values.Exam_type_idExam_type,async (err,price)=>{
 								if(err){
 									reject(err);
 								}else{
-									// CONTROL EXTRA EXAMS FOR THEORIC
-									Check_balance(values.Booked_idBooked,values.Exam_type_idExam_type,(cb)=>{
-										if (cb=true){
-											resolve();
+									dbHandlers.Qgen_pendent_payments.Qcreate_PendentPayment_tax(price.Value,
+											values.Booked_idBooked,values.Student_license_idStudent_license,
+											async (err,tax) => {
+										if(err){
+											reject(err);
 										}else{
-											reject();	
+											// CONTROL EXTRA EXAMS FOR THEORIC
+											Check_balance(values.Booked_idBooked,values.Exam_type_idExam_type,(cb)=>{
+												if (cb=true){
+													resolve();
+												}else{
+													reject();	
+												};
+											});
 										};
 									});
 								};
@@ -458,7 +439,7 @@ var P_create_exams = async(values) => {
 						};
 					});
 				};
-			});	
+			});
 		}catch (err){
 			return reject(err);
 		};
@@ -466,7 +447,7 @@ var P_create_exams = async(values) => {
 };
 
 // Promise get bookings for given timeslot 
-var P_get_bookings = async (idTimeslot) => {
+var P_get_bookings = async (idTimeslot,idaccount) => {
 	return await new Promise((resolve,reject)=>{
 		try{
 			// console.log("timeslot id "+ idTimeslot);
@@ -482,7 +463,7 @@ var P_get_bookings = async (idTimeslot) => {
 						bookings.forEach((element)=>{
 							// concatenate booking with account user logged in
 							var values = {};
-							_.assign(values, element, {'Account_idAccount': 1});
+							_.assign(values, element, {'Account_idAccount': idaccount});
 							arr_create_exams.push(P_create_exams(values));
 						});
 						Promise.all(arr_create_exams)
@@ -507,7 +488,6 @@ var P_get_bookings = async (idTimeslot) => {
 var P_number_exams = async (idexam,number)=>{
 	return await new Promise((resolve,reject)=>{
 		try{
-			// console.log("number exam")
 			dbHandlers.Qgen_exam.Qupdate_ExamNumber(idexam,number,(err,results)=>{
 				if (err){
 					reject(err);
@@ -534,7 +514,7 @@ var updatePauta = async (req,res,next)=>{
 					return res.status(500).json({message:"Error getting Pauta"});	
 				}else{
 					if(results[0].Exam_type_idExam_type){
-						dbHandlers.Qgen_examiner_qualification.Qget_Examiner_qualification(req.body.idExaminer,
+						dbHandlers.Qgen_examiner_qualification.Qget_IdExaminer_qualification(req.body.idExaminer,
 									results[0].Exam_type_idExam_type,(err,results)=>{
 							if(err){
 								console.log(err);
@@ -559,12 +539,11 @@ var updatePauta = async (req,res,next)=>{
 				};
 			});
 		// modify given pauta
-		}else if(req.body.Pauta_num||req.body.Exam_date||req.body.Pauta_date||req.body.Inital_hour||req.body.Final_hour||
-					req.body.Exam_route_idExam_route||req.body.Exam_type_idExam_type){
+		}else if(req.body.Pauta_num||req.body.Exam_date||req.body.Pauta_date||req.body.Exam_route_idExam_route||req.body.Exam_type_idExam_type){
 			// normal update to table
-			dbHandlers.Qgen_pauta.Qupdate_byIdPauta(req.query.idPauta,[req.body.Pauta_num,req.body.Exam_date,
-						req.body.Pauta_date,req.body.Inital_hour,req.body.Final_hour,
-						req.body.Exam_route_idExam_route,req.body.Exam_type_idExam_type],(err,results)=>{
+			dbHandlers.Qgen_pauta.Qupdate_byIdPauta(req.query.idPauta,_.pick(req.body, ['Pauta_num','Pauta_date','F_reason',
+							'Timeslot_idTimeslot','Account_idAccount','Exam_type_idExam_type','Exam_route_idExam_route',
+							'Examiner_qualifications_idExaminer_qualifications']),(err,results)=>{
 				if(err){
 					console.log(err);
 					res.status(500).json({message:"Error updating Pauta"});
@@ -574,7 +553,9 @@ var updatePauta = async (req,res,next)=>{
 			});
 		// update results for given pauta
 		}else if(req.query.Result){
+			console.log(req.body);
 			if (req.body.results.length>0){
+				// console.log("USER "+ req.user.user);
 				let arr_patch_results=[];
 				req.body.results.forEach((element)=>{
 							arr_patch_results.push(P_exam_result(element));
@@ -597,85 +578,109 @@ var updatePauta = async (req,res,next)=>{
 		// get server time plus time_window.minutes
 		let time_now=moment().add(config.time_window.minutes,'m').format("H:mm:ss");
 		let date_now=moment().format("YYYY-MM-DD");
+
+		console.log("Search time "+ date_now +" with "+time_now);
 		// get next timeslots
 		dbHandlers.Qgen_timeslot.Qget_nextTimeslot(req.body.Exam_center_idExam_center,date_now.toString(),
-						time_now,(err,timeslots)=>{			
+						time_now, (err,timeslots)=>{			
 			if (err){
 				console.log(err);
 				res.status(500).json({message:"Error getting timeslots"});	
 			}else if (timeslots.length<=0){
 				res.status(204).json({message:"No timeslots found"});		
 			}else{
-				// -----------------------------------------------------
-				// Randomize examiners for given timeslots
-				P_randomize_examiners(req.body.Exam_center_idExam_center,timeslots,date_now,time_now);
-				Promise.all(P_randomize_examiners)
-					.then(()=>{
-    					// everything went ok
-					}).catch((err)=>{
-	                // log that I have an error, return the entire array;
-		                console.log(err);
-		                return res.status(500).json({message:"Database error randomizing examiners"});
-    				});
-				// -----------------------------------------------------
-				// Randomize routes for given timeslots
-				var arr_routes=[];
-				timeslots.forEach((element)=>{
-					arr_routes.push(P_patch_route(element));	
-				});
-				Promise.all(arr_routes)
-    				.then(()=>{
-    					// everything went ok
-					}).catch((err)=>{
-	                // log that I have an error, return the entire array;
-		                console.log(err);
-		                return res.status(500).json({message:"Database error randomizing routes"});
-    				});
-				// -----------------------------------------------------
-				var arr_start_exams=[];
-				timeslots.forEach((element)=>{
-					arr_start_exams.push(P_get_bookings(element.idTimeslot));	
-				});	
-				Promise.all(arr_start_exams)
-    				.then(()=>{
-    					// Need to assign numbers to exams
-    					dbHandlers.Qgen_exam.Qget_not_numbered_exams(req.body.Exam_center_idExam_center,(err,exams)=>{
-    						if (err || exams.length<=0){
-    							console.log(err);
-    							return res.status(500).json({message:"Database error allocating examiners"});	
-    						}else{
-    							// temp numeration to put in all exams missing it
-    							var temp_numeration=0;
-    							dbHandlers.Qgen_exam.Qget_MAXExamNum(req.body.Exam_center_idExam_center,(err,number)=>{
-    								if (err){
-    									console.log(err);
-    									return res.status(500).json({message:"Database error numbering exams"});	
-    								}else if(number[0].Exam_num===null){
-    									var temp_numeration=0;
-    								}else{
-    									var temp_numeration=number[0].Exam_num;	
-    								};
-    								var arr_number_exams=[];
-									exams.forEach((element)=>{
-										temp_numeration=temp_numeration+1
-										arr_number_exams.push(P_number_exams(element.idExam,temp_numeration));	
-									});
-									Promise.all(arr_number_exams)
-										.then(()=>{
-											res.status(200).json({message:"Examiners defined and Exams created"});		
-										}).catch((err)=>{
-							                // log that I have an error, return the entire array;
-							                console.log(err);
-							                return res.status(500).json({message:"Database error allocating examiners"});
-				        				});
-    							});	
-    						};
-    					});
-					}).catch((err)=>{
-		                // log that I have an error, return the entire array;
-		                console.log(err);
-		                return res.status(500).json({message:"Database error allocating examiners"});
-    				});			
+				dbHandlers.Qgen_accounts.Qget_byUserAccount(req.user.user, async (e,account)=>{
+					if(e){
+						console.log(e);
+						return res.status(500).json({message:"Database error identifiyng user"});
+					}else{
+						// -----------------------------------------------------
+						// Randomize examiners for given timeslots
+						var examiners = await P_randomize_examiners(req.body.Exam_center_idExam_center);
+											// Promise.all(P_randomize_examiners)
+											// 	.then(()=>{
+										    // // everything went ok
+														// 	}).catch((err)=>{
+											   //              // log that I have an error, return the entire array;
+												  //               console.log(err);
+												  //               return res.status(500).json({message:"Database error randomizing examiners"});
+										    // 				});
+						console.log("--------------------------------------------");
+						console.log("OS EXAMINADORES " + JSON.stringify(examiners));
+						console.log("OS EXAMINADORES " + JSON.stringify(examiners.length));
+						console.log("OS EXAMINADORES " + JSON.stringify(examiners[0][0]));
+						console.log("OS EXAMINADORES " + JSON.stringify(examiners[0][1]));
+						console.log("--------------------------------------------");
+						for (let i = 0; i < examiners.length; i++) {
+							dbHandlers.Qgen_pauta.Qupdate_Pauta_examiner(examiners[1],examiners[i],(e)=>{
+								if(e){
+									console.log("Database error writing examiners");
+								};
+							});
+						};
+						// -----------------------------------------------------
+						// Randomize routes for given timeslots
+						var arr_routes=[];
+						timeslots.forEach((element)=>{
+							arr_routes.push(P_patch_route(element));	
+						});
+						Promise.all(arr_routes)
+		    				.then(()=>{
+		    					// everything went ok
+							}).catch((err)=>{
+			                // log that I have an error, return the entire array;
+				                console.log(err);
+				                return res.status(500).json({message:"Database error randomizing routes"});
+		    				});
+						// -----------------------------------------------------
+						var arr_start_exams=[];
+						timeslots.forEach((element)=>{
+							arr_start_exams.push(P_get_bookings(element.idTimeslot,account.idAccount));	
+						});	
+						Promise.all(arr_start_exams)
+		    				.then(()=>{
+		    					// Need to assign numbers to exams
+		    					dbHandlers.Qgen_exam.Qget_not_numbered_exams(req.body.Exam_center_idExam_center,(err,exams)=>{
+		    						console.log(exams)
+		    						if (err || exams.length<=0){
+		    							console.log(err);
+		    							return res.status(500).json({message:"Database error fetching exams to number"});	
+		    						}else{
+		    							// temp numeration to put in all exams missing it
+		    							var temp_numeration=0;
+		    							dbHandlers.Qgen_exam.Qget_MAXExamNum(req.body.Exam_center_idExam_center,(err,number)=>{
+		    								if (err){
+		    									console.log(err);
+		    									return res.status(500).json({message:"Database error numbering exams"});	
+		    								}else if(number[0].Exam_num===null){
+		    									var temp_numeration=0;
+		    								}else{
+		    									var temp_numeration=number[0].Exam_num;	
+		    								};
+		    								var arr_number_exams=[];
+											exams.forEach((element)=>{
+												temp_numeration=temp_numeration+1
+												arr_number_exams.push(P_number_exams(element.idExam,temp_numeration));	
+											});
+											Promise.all(arr_number_exams)
+												.then(()=>{
+													res.status(200).json({message:"Examiners defined and Exams created"});		
+												}).catch((err)=>{
+									                // log that I have an error, return the entire array;
+									                console.log(err);
+									                return res.status(500).json({message:"Database error allocating examiners"});
+						        				});
+
+		    							});	
+		    						};
+		    					});
+							}).catch((err)=>{
+				                // log that I have an error, return the entire array;
+				                console.log(err);
+				                return res.status(500).json({message:"Database error allocating examiners"});
+		    				});
+		    		};
+    			});		
 			};
 		});
 	}else{

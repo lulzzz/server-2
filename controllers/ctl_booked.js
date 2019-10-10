@@ -79,6 +79,18 @@ async function createBooking (req,res,next){
 	if (!req.query.search){
 		if (req.body.Booked_date  && req.body.Student_license_idStudent_license && req.body.Timeslot_idTimeslot 
 					&& req.body.Exam_center_idExam_center && req.body.Exam_type_idExam_type){
+			// Promise to get account id
+			var P_account=new Promise((resolve,reject)=>{
+				dbHandlers.Qgen_accounts.Qget_byUserAccount(req.user.user,(e,account)=>{
+					if(err){
+						console.log(err);
+						return res.status(500).send({message:"Error getting account"});
+						reject();
+					}else{
+						resolve(account.idAccount);	
+					};	
+				});
+			});
 			// Promise to get status id
 			var P_status=new Promise((resolve,reject)=>{
 				// process 1 is always the booking
@@ -94,9 +106,11 @@ async function createBooking (req,res,next){
 			});
 
 			let temp_status = await P_status.then();
+			let temp_account = await P_account.then();
+			
 			// creates booking
 			dbHandlers.Qgen_booked.Qcreate_Booking([req.body.Booked_date,req.body.Obs,
-						req.body.Student_license_idStudent_license,req.body.Timeslot_idTimeslot,1,
+						req.body.Student_license_idStudent_license,req.body.Timeslot_idTimeslot,temp_account,
 						req.body.Exam_center_idExam_center,req.body.Exam_type_idExam_type,temp_status],
 						(err,results)=>{
 				if(err){
@@ -242,9 +256,8 @@ async function createBooking (req,res,next){
 var deleteBooking = (req,res,next)=>{
 	console.log("Delete Booking");
 	if(req.query.idBooked){
-		dbHandlers.Qgen_booked.Qdelete_byIdBooking(req.query.idBooked, function(err,results){
+		dbHandlers.Qgen_booked.Qdelete_byIdBooking(req.query.idBooked, (err,results)=>{
 			if(err){
-				// internal error
 				console.log(err);
 				return res.status(500).json({message:"Error deleting booking"});
 			}else{
@@ -288,150 +301,3 @@ module.exports = {
 	deleteBooking,
 	updateBooking
 }
-
-
-		// dbHandlers.Qgen_booked.Qget_nextExamNum((err,results)=>{
-		// 	if (err){
-		// 		res.status(500).send({message:"Error getting exam number"});
-		// 	}else{
-		// 		console.log("Exam number allocated: " + JSON.stringify(results[0]));
-		// 		if (results[0].Exam_num===null){
-		// 			var exam_num=1;
-		// 		}else{
-		// 			var exam_num=results[0].Exam_num+1;
-		// 		};
-				// dbHandlers.Qgen_booked.Qget_PautaNum(req.body.Exam_date,req.body.Group,(err,results)=>{
-				// 	if (err){
-				// 		res.status(500).send({message:"Error getting pauta number"});	
-				// 	}else{
-				// 		console.log("Pauta number allocated: " + JSON.stringify(results[0]));
-				// 		if (results[0].Pauta_num===null || results[0].length>0){
-				// 			var Pauta_num=results[0].Pauta_num;
-				// 		}else{
-				// 			var Pauta_num=results[0].Pauta_num+1;
-				// 		};	
-
-				// 	}
-
-				// });
-				// Pauta Num to be define when exam starts
-				// doubt how to grab account id for now force 1
-				// Exam_type_idExam_type
-				
-
-
-				// POST request for booking
-// async function createBooking (req,res,next){
-// 	// validates schema
-// 	console.log("Creating Booking.");
-// 	console.log(req.body)
-// 	// mandatory fields
-// 	if (req.body.Booked_date && req.body.Exam_date && req.body.Exam_group && req.body.Exam_type_idExam_type 
-// 				&& req.body.Exam_center_idExam_center){
-// 		// Promise to get pauta number
-// 		var P_pauta_num = new Promise((resolve,reject)=>{
-// 			dbHandlers.Qgen_booked.Qget_PautaNum(req.body.Exam_date,req.body.Exam_group,(err,results)=>{
-// 				if (err){
-// 					console.log(err);
-// 					return res.status(500).send({message:"Error getting pauta number"});
-// 					reject();
-// 				}else{
-// 					if (!results.length){
-// 						dbHandlers.Qgen_booked.Qget_nextPautaNum((err,results)=>{
-// 							if (err){
-// 								console.log(err);
-// 								return res.status(500).send({message:"Error getting next pauta number"});
-// 								reject();
-// 							}else{
-// 								temp_pauta_num=results[0].Pauta_num
-// 								if (temp_pauta_num==null){
-// 									// first pauta in system
-// 									temp_pauta_num=1;
-// 								}
-// 								dbHandlers.Qgen_pauta.Qcreate_Pauta([temp_pauta_num,req.body.Exam_date,req.body.Exam_group,
-// 											1,req.body.Exam_type_idExam_type],(err,results)=>{
-// 									if(err){
-// 										console.log(err);
-// 										return res.status(500).send({message:"Error creating pauta number"});	
-// 										reject();
-// 									}else{
-// 										console.log("Pauta number allocated: " + temp_pauta_num);
-// 										resolve(temp_pauta_num);
-// 									};
-// 								});
-// 								// resolve(results[0].Pauta_num);
-// 							};
-// 						});
-// 					}else{
-// 						console.log("Pauta number allocated: " + results[0].Pauta_num);
-// 						resolve(results[0].Pauta_num);
-// 					};	
-// 				};
-// 			});
-// 		});
-// 		// Promise to get status id
-// 		var P_status=new Promise((resolve,reject)=>{
-// 			// process 1 is always the booking
-// 			dbHandlers.Qgen_exam_status.Qget_byProcessExam_Status(1,(err,results)=>{
-// 				if(err){
-// 					console.log(err);
-// 					return res.status(500).send({message:"Error getting status"});
-// 					reject();
-// 				}else{
-// 					resolve(results[0].idexam_status);	
-// 				}
-// 			});
-// 		});
-		
-// 		let temp_pauta = await P_pauta_num.then();
-// 		let temp_status=await P_status.then();
-
-// 		dbHandlers.Qgen_booked.Qcreate_Booking([temp_pauta,req.body.Booked_date,	
-// 							req.body.Exam_date,req.body.Exam_group,req.body.Obs,
-// 							req.body.Student_license_idStudent_license,1,req.body.Exam_center_idExam_center,
-// 							req.body.Exam_type_idExam_type,temp_status],(err,results)=>{
-// 			if(err){
-// 				// fail inserting
-// 				console.log(err);
-// 				res.status(500).send({message:"Error creating booking"});	
-// 			}else{
-// 				// sucess
-// 				res.status(200).json({message:'Booking created!'});		
-// 			};	
-// 		});
-// 	}else{
-// 		// missing mandatory fields
-// 		res.status(400).send({message:"Bad Request."});	
-// 	};
-// };
-
-
-
-// function buildConditions(params) {
-//   var conditions = [];
-//   var values = [];
-//   var conditionsStr;
-
-//   if (typeof params.name !== 'undefined') {
-//     conditions.push("name LIKE ?");
-//     values.push("%" + params.name + "%");
-//   }
-
-//   if (typeof params.age !== 'undefined') {
-//     conditions.push("age = ?");
-//     values.push(parseInt(params.age));
-//   }
-
-//   return {
-//     where: conditions.length ?
-//              conditions.join(' AND ') : '1',
-//     values: values
-//   };
-// }
-
-// var conditions = buildConditions(params);
-// var sql = 'SELECT * FROM table WHERE ' + conditions.where;
-
-// connection.query(sql, conditions.values, function(err, results) {
-//   // do things
-// });

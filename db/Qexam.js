@@ -70,7 +70,7 @@ var Qget_MAXExamNum=(idexam_center,cb)=>{
 // put record in exams given exam_center id
 var Qcreate_Exam=(values,cb)=>{
 	//console.log(values);
-	return myQuery('INSERT INTO Exam (Booked_idBooked,Account_idAccount,Pauta_idPauta) '+
+	return myQuery('INSERT INTO Exam (Booked_idBooked,Account_idAccount,Pauta_idPauta,Car_plate) '+
 							'values (?)',[values],(error, results, fields)=>{
 		error ? cb(error) : cb(false,results);	
 	});

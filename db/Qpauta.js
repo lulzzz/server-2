@@ -29,7 +29,9 @@ var Qget_byId_Exam_Center_Pauta = (idpauta,idexam_center,cb)=>{
 };
 
 var Qget_byIdPauta = (idpauta,cb)=>{
-	return myQuery('SELECT Pauta.*,Timeslot.*, Student.*, Examiner.*, Exam_route.Route,Exam_type.Short,school.permit, exam.idExam FROM Pauta '+
+	return myQuery('SELECT Pauta.*,Timeslot.*, Student.*, Examiner.*, Exam_route.Route,Exam_type.Short,school.permit, '+
+				'exam.idExam,exam.T_exam_results_idT_exam_results,exam.Car_plate,exam.Revision,exam.Complain,school.School_name '+
+				'FROM Pauta '+
 				'LEFT JOIN Timeslot on Pauta.Timeslot_idTimeslot=Timeslot.idTimeslot '+
 			    'LEFT JOIN Booked on Booked.Timeslot_idTimeslot= Timeslot.idTimeslot '+
 			    'LEFT JOIN student_license on Booked.Student_license_idStudent_license= Student_license.idStudent_license '+
@@ -46,7 +48,9 @@ var Qget_byIdPauta = (idpauta,cb)=>{
 };
 
 var Qget_byNumPauta = (pauta_num,cb)=>{
-	return myQuery('SELECT Pauta.*,Timeslot.*,Student.*,Examiner.*,Exam_route.Route,Exam_type.Short,school.permit,exam.idExam FROM Pauta '+
+	return myQuery('SELECT Pauta.*,Timeslot.*,Student.*,Examiner.*,Exam_route.Route,Exam_type.Short,school.permit,'+
+				'exam.idExam,exam.T_exam_results_idT_exam_results,exam.Car_plate,exam.Revision,exam.Complain,school.School_name '+
+				'FROM Pauta '+
 				'LEFT JOIN Timeslot on Pauta.Timeslot_idTimeslot=Timeslot.idTimeslot '+
 			    'LEFT JOIN Booked on Booked.Timeslot_idTimeslot= Timeslot.idTimeslot '+
 			    'LEFT JOIN student_license on Booked.Student_license_idStudent_license= Student_license.idStudent_license '+
@@ -82,13 +86,6 @@ var Qget_MAXPautaNum=(idexam_center,cb)=>{
 		error ? cb(error) : cb(false,results);	
 	});
 };
-
-// var Qget_idPauta_Pauta_num = (pauta_num,cb)=>{
-// 	return myQuery('SELECT idPauta FROM Pauta WHERE Pauta_num = ?',[pauta_num],(error, results, fields)=>{
-// 		error ? cb(error) : cb(false,results);
-// 	});
-// };
-
 
 // create pauta
 var Qcreate_Pauta=(values,cb)=>{
@@ -136,6 +133,22 @@ var Qupdate_Pauta_route=(idroute,pauta_num,cb)=>{
 	})
 };
 
+// update record in Pauta
+var Qupdate_Pauta_route=(idroute,pauta_num,cb)=>{
+	return myQuery('UPDATE Pauta SET Exam_route_idExam_route=? where Pauta_num=?',
+				[idroute,pauta_num],(error, results,fields)=>{
+		error ? cb(error) : cb(false,results);	
+	})
+};
+
+// update record in Pauta
+var Qupdate_Pauta_examiner=(idExaminer_qualifications,idtimeslot,cb)=>{
+	return myQuery('UPDATE Pauta SET Examiner_qualifications_idExaminer_qualifications=? where Timeslot_idTimeslot=?',
+				[idExaminer_qualifications,idtimeslot],(error, results,fields)=>{
+		error ? cb(error) : cb(false,results);	
+	})
+};
+
 // -----------------------------------ADVANCE SEARCH------------------------------------------
 var Qget_search=(query,values,cb)=>{
 	let customQuery='SELECT pauta.*,timeslot.*,Exam.* '+
@@ -147,7 +160,6 @@ var Qget_search=(query,values,cb)=>{
 		error ? cb(error) : cb(false,results);
 	});	
 };
-
 
 module.exports = function(myQuery){
 	return {
@@ -165,6 +177,7 @@ module.exports = function(myQuery){
 		Qupdate_Force_Examiner,
 		Qupdate_Pauta_Examiner_qualifications,
 		Qupdate_Pauta_route,
+		Qupdate_Pauta_examiner,
 		Qget_search
 	};
 };
