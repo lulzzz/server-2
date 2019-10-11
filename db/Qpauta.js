@@ -87,6 +87,20 @@ var Qget_MAXPautaNum=(idexam_center,cb)=>{
 	});
 };
 
+// Get examiners and routes allocated to pautas on starting timeslots
+var Qget_SelectionPautas=(idexam_center,date,time,cb)=>{
+		return myQuery('SELECT Pauta.Pauta_num,Examiner.License_num,Examiner.Examiner_name,Exam_route.Route '+
+				'FROM timeslot LEFT JOIN Pauta ON Timeslot.idTimeslot = Pauta.Timeslot_idTimeslot '+
+				'LEFT JOIN Examiner_qualifications '+
+					'ON Pauta.Examiner_qualifications_idExaminer_qualifications=Examiner_qualifications.idExaminer_qualifications '+
+				'LEFT JOIN Examiner ON Examiner_qualifications.Examiner_idExaminer=Examiner.idExaminer '+
+				'LEFT JOIN Exam_route ON Pauta.Exam_route_idExam_route=Exam_route.idExam_route '+
+				'WHERE Timeslot_date= ? AND Begin_time<= ? AND Timeslot.Exam_center_idExam_center = ?',
+				[date,time,idexam_center],(error, results, fields)=>{
+		error ? cb(error) : cb(false,results);	
+	});
+};
+
 // create pauta
 var Qcreate_Pauta=(values,cb)=>{
 	return myQuery('INSERT INTO Pauta (Pauta_num,Timeslot_idTimeslot,Account_idAccount,Exam_type_idExam_type) values (?)',
@@ -171,6 +185,7 @@ module.exports = function(myQuery){
 		Qget_byTimeslotPauta,
 		Qget_byPauta_num_Pauta,
 		Qget_MAXPautaNum,
+		Qget_SelectionPautas,
 		Qcreate_Pauta,
 		Qdelete_byIdPauta,
 		Qupdate_byIdPauta,

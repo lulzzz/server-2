@@ -16,6 +16,18 @@ var generateToken = (account)=>{
 	  }, config.backend.jwt_secret);
 };
 
+var get_Accounts = (req,res,next)=>{
+	dbHandlers.Qgen_accounts.Qget_AllAcounts((e,accounts)=>{
+		if(e){
+			console.log(e);
+			return res.status(500).json({message:"Error fetching accounts"});	
+		}else{
+			return res.status(200).json(accounts);	
+		};
+	});
+};
+
+
 module.exports = {
 	register : (req,res)=>{
 		if(req.body.user && req.body.password){
@@ -117,7 +129,8 @@ module.exports = {
 				};
 			})(req,res);
 		};
-	}
+	},
+	get_Accounts
 }
 
 	//   	var keys = Object.keys(parsedResults[outerIndex]);

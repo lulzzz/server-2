@@ -5,6 +5,155 @@ const csv = require('fast-csv');
 var config=require('../config.json');
 var dbHandlers = require("../db");
 
+
+var getPEP = (req, res)=>{
+    try {
+        var conditions = ['Booked.Exam_center_idExam_center = ?'];
+        var values = [req.params.idExam_center];
+        var conditionsStr;
+        if (typeof req.body.Timeslot_date1 !== 'undefined' && typeof req.body.Timeslot_date2 === 'undefined') {
+            conditions.push('timeslot.Timeslot_date = ?');
+            values.push(req.body.Timeslot_date1);
+        } else if (typeof req.body.Timeslot_date1 !== 'undefined' && typeof req.body.Timeslot_date2 !== 'undefined') {
+            conditions.push('timeslot.Timeslot_date BETWEEN ? AND ?');
+            values.push(req.body.Timeslot_date1);
+            values.push(req.body.Timeslot_date2);
+        };
+
+        // se não for especificado, vai buscar os resultados não enviados ou com erros
+        if (typeof req.body.idsicc_status !== 'undefined') {
+            conditions.push('booked.sicc_status_idsicc_status = ?');
+            values.push(req.body.idsicc_status);
+        } else {
+            conditions.push('(booked.sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 1 AND operation = 1) OR booked.sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 1 AND operation = 3))');
+        }
+        if (typeof req.body.Pauta_num !== 'undefined') {
+            conditions.push('pauta.Pauta_num = ?');
+            values.push(req.body.Pauta_num);
+        };
+        if (typeof req.body.Student_license !== 'undefined') {
+            conditions.push('student_license.Student_license = ?');
+            values.push(req.body.Student_license);
+        };
+        if (typeof req.body.idExam_type !== 'undefined') {
+            conditions.push('exam_type.idExam_type = ?');
+            values.push(req.body.idExam_type);
+        };
+
+        conditionsStr = conditions.length ? conditions.join(' AND ') : '1';
+
+        console.log("TESTE    " + conditionsStr)
+
+        dbHandlers.Qgen_imtt.Qget_search_PEP(conditionsStr, values, (err, PEP) => {
+            if (err) {
+                console.log(err.message);
+                return res.status(500).json({message:"Database error fetching PEP"});
+            } else if (PEP.length === 0) {
+                return res.status(204).json("No records found");
+            }else{
+                return res.status(200).json(PEP);    
+            }
+        });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).send({message:"Database error creating file"});
+    };
+};
+
+var getREP = (req, res)=>{
+    try {    
+        var conditions = ['Booked.Exam_center_idExam_center = ?'];
+        var values = [req.params.idExam_center];
+        var conditionsStr;
+        if (typeof req.body.Timeslot_date1 !== 'undefined' && typeof req.body.Timeslot_date2 === 'undefined') {
+            conditions.push('timeslot.Timeslot_date = ?');
+            values.push(req.body.Timeslot_date1);
+        } else if (typeof req.body.Timeslot_date1 !== 'undefined' && typeof req.body.Timeslot_date2 !== 'undefined') {
+            conditions.push('timeslot.Timeslot_date BETWEEN ? AND ?');
+            values.push(req.body.Timeslot_date1);
+            values.push(req.body.Timeslot_date2);
+        };
+        if (typeof req.body.Pauta_num !== 'undefined') {
+            conditions.push('pauta.Pauta_num = ?');
+            values.push(req.body.Pauta_num);
+        };
+        if (typeof req.body.Student_license !== 'undefined') {
+            conditions.push('student_license.Student_license = ?');
+            values.push(req.body.Student_license);
+        };
+
+        // se não for especificado, vai buscar os resultados não enviados ou com erros
+        if (typeof req.body.idsicc_status !== 'undefined') {
+            conditions.push('exam.sicc_status_idsicc_status = ?');
+            values.push(req.body.idsicc_status);
+        } else {
+            conditions.push('(exam.sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 3 AND operation = 1) OR exam.sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 3 AND operation = 3))');
+        }
+
+        if (typeof req.body.idExam_type !== 'undefined') {
+            conditions.push('exam_type.idExam_type = ?');
+            values.push(req.body.idExam_type);
+        };
+
+        conditionsStr = conditions.length ? conditions.join(' AND ') : '1';
+
+        dbHandlers.Qgen_imtt.Qget_search_REP(conditionsStr, values, (err, REP) => {
+            if (err) {
+                console.log(err.message);
+                return res.status(500).json({message:"Database error fetching REP"});
+            } else if (results.length === 0) {
+                return res.status(204).send("No records found")
+            }else{
+                return res.status(200).json(REP);
+            };
+        });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).send({message:"Database error creating file"});
+    };
+};
+
+var getETC = (req, res)=>{
+    try {    
+        var conditions = ['Booked.Exam_center_idExam_center = ?'];
+        var values = [req.params.idExam_center];
+        var conditionsStr;
+        if (typeof req.body.Timeslot_date1 !== 'undefined' && typeof req.body.Timeslot_date2 === 'undefined') {
+            conditions.push('timeslot.Timeslot_date = ?');
+            values.push(req.body.Timeslot_date1);
+        } else if (typeof req.body.Timeslot_date1 !== 'undefined' && typeof req.body.Timeslot_date2 !== 'undefined') {
+            conditions.push('timeslot.Timeslot_date BETWEEN ? AND ?');
+            values.push(req.body.Timeslot_date1);
+            values.push(req.body.Timeslot_date2);
+        };
+
+        // se não for especificado, vai buscar os resultados não enviados ou com erros
+        if (typeof req.body.idsicc_status !== 'undefined') {
+            conditions.push('student_license.T_sicc_status_idsicc_status = ?');
+            values.push(req.body.idsicc_status);
+        } else {
+            conditions.push('(student_license.T_sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 2 AND operation = 1) OR student_license.T_sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 2 AND operation = 3))');
+        }
+
+        conditionsStr = conditions.length ? conditions.join(' AND ') : '1';
+
+        dbHandlers.Qgen_imtt.Qget_search_ETC(conditionsStr, values, (err, ETC) => {
+            if (err) {
+                console.log(err.message);
+                return res.status(500).json({message:"Database error fetching ETC"});
+            } else if (results.length === 0) {
+                return res.status(204).json({message:"No records found"});
+            } else {
+                return res.status(200).json(ETC);
+            };
+        });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).send({message:"Database error creating file"});
+    };
+};
+
+
 /**
  * Scrape response html for PEP, REP or ETC errors
  * @param {html} body 
@@ -143,7 +292,6 @@ function PEP(req, res) {
         } else {
             conditions.push('(booked.sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 1 AND operation = 1) OR booked.sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 1 AND operation = 3))');
         }
-
         if (typeof req.body.Pauta_num !== 'undefined') {
             conditions.push('pauta.Pauta_num = ?');
             values.push(req.body.Pauta_num);
@@ -251,7 +399,7 @@ function PEP(req, res) {
                                 console.log(result.affectedRows + " record(s) updated");
                             });
                         });
-                        // return res.status(200).json({message:"File sent successfully"});
+                        return res.status(200).json({message:"File sent successfully"});
                     });
                 })
             };
@@ -542,7 +690,13 @@ function ETC(req, res) {
 }
 
 var POST_sicc= async (req,res,next)=>{
-    if (req.query.createfile){
+    if (req.query.getPEP){
+        getPEP(req, res);    
+    }else if (req.query.getREP){
+        getREP(req, res);
+    }else if (req.query.getETC){
+        getETC(req, res);
+    }else if (req.query.createfile){
         if (typeof req.body.sicc !== 'undefined') {
             switch (req.body.sicc.toUpperCase()) {
                 case 'PEP':

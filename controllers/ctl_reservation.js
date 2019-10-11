@@ -7,6 +7,7 @@ var config=require('../config.json');
 var nodemailer = require('nodemailer');
 var request=require('request');
 var moment=require('moment');
+var multer = require('multer');
 
 // Request handlers
 var getList_ReservationsByIdTimeslot = async (req, res)=>{
@@ -135,7 +136,39 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 };
 
 var postList_Reservations=async(req,res)=>{
-	if (!req.query.search){
+	if(req.query.idReservation && req.query.file){
+		console.log("ENTREI AQUI")
+		 // console.log(req.file);
+		// var upload = multer({ dest: './' }).single('file');
+
+
+
+		// var upload = multer({ 
+		// 	storage: multer.diskStorage({
+	 //        	destination: function (req, file, cb) {
+	 //    			cb(null, './');
+	 // 	 		},
+	 //  			filename: function (req, file, cb) {
+	 //    			cb(null, file.originalname);
+	 //  			}
+		// 	})
+		
+		// });
+		// console.log(upload)
+        // upload(req, res, function (err) {
+        //     if (err instanceof multer.MulterError) {
+        //         console.log(err.message);
+        //         return res.status(406).json({message:"Bad format file"});
+        //     } else if (err) {
+        //         console.log(err.message);
+        //         return res.status(400).json({message:"Bad request"})
+        //     }
+        //     return res.status(200).json({message:"OK"});
+        // });
+
+
+
+	}else if (!req.query.search){
 		// Deletes expired and locked reservations
 		await new Promise((resolve) => {
 			dbHandlers.Qgen_reservations.Qdelete_lockedExpiredReservationsByIdTimeslot(req.body.idTimeslot,new Date(),(error)=>{ 
@@ -469,8 +502,7 @@ var deleteList_reservations = (req, res) => {
 };
 
 // Update the reservation
-var patchList_Reservations=async(req,res)=>{
-	// console.log(req.body);
+var patchList_Reservations=async(req,res,next)=>{
 	if (req.query.idReservation) {
 		if(!req.query.cancel){
 			// var response_flag=false;
@@ -556,12 +588,12 @@ var patchList_Reservations=async(req,res)=>{
 			// Promise to get account id
 			var P_account=new Promise((resolve,reject)=>{
 				dbHandlers.Qgen_accounts.Qget_byUserAccount(req.user.user,(e,account)=>{
-					if(err){
-						console.log(err);
-						return res.status(500).send({message:"Error getting account"});
+					if(e){
+						console.log(e);
+						return res.status(500).json({message:"Error getting account"});
 						reject();
 					}else{
-						resolve(account[0].idAccount);	
+						resolve(account.idAccount);	
 					};	
 				});
 			});
@@ -627,70 +659,28 @@ var patchList_Reservations=async(req,res)=>{
 																	console.log(err);
 																	return res.status(500).send({message:"Error creating booking"});
 																}else{
-																	return res.status(200).send({message:"Booking created"});
+																	dbHandlers.Qgen_exam_status.Qget_byProcessAprovedID(0,(e,id_status)=>{
+																		if (e){
+																			console.log(e);	
+																		}else{
+																			// Change the status of given reservation to APROVED
+																			dbHandlers.Qgen_reservations.Qpatch_Pendentreservation(id_status[0].idexam_status,
+																						req.body.idReservation,(e)=>{
+																				if (e){
+																					console.log(e);
+																					return res.status(500).send({message:"Error creating booking"});
+																				}else{
+																					return res.status(200).send({message:"Booking created"});
+																				};
+																			});
+																		};
+																	});
 																};
 															});
 														};
 													});	
 												};
 											});
-
-											// creates booking
-											// dbHandlers.Qgen_booked.Qcreate_Booking([new Date(),reservation[0].Obs,
-											// 			tempstudent_license,reservation[0].idTimeslot,1,
-											// 			req.params.idExam_center,reservation[0].Exam_type_idExam_type,
-											// 			2,1],(err,results)=>{
-											// 	if (err){
-											// 		console.log(err);
-											// 		return res.status(500).send({message:"Error creating booking"});
-											// 	}else{
-													// var temp_booking=results.insertId;
-													// dbHandlers.Qgen_school.Qget_School_Associated(tempstudent_license,
-													// 				(err,school2)=>{
-													// 	if (err || school2.length<=0){
-													// 		console.log(err);
-													// 		res.status(500).json({message:"Error getting membership"});
-													// 	}else{
-													// 		if(school2.Associate_num === null){
-													// 			dbHandlers.Qgen_exam_price.Qget_price_NO_associated(reservation[0].Exam_type_idExam_type,
-													// 					(err,price)=>{
-													// 				if (err || price.length<=0){
-													// 					console.log(err);
-													// 					res.status(500).json({message:"Error getting exam price"});	
-													// 				}else{
-													// 					dbHandlers.Qgen_pendent_payments.Qcreate_PendentPayment_exam(price[0].Value,temp_booking,
-													// 							tempstudent_license,(err,results)=>{
-													// 						if(err){
-													// 							res.status(500).json({message:"Error creating pendent payment"});
-													// 						}else{
-													// 							res.status(200).json({message:'Booking created!'});	
-													// 						}
-													// 					});	
-													// 				}
-													// 			});
-													// 		}else{
-													// 			dbHandlers.Qgen_exam_price.Qget_price_associated(reservation[0].Exam_type_idExam_type,
-													// 					(err,price)=>{
-													// 				if (err || price.length<=0){
-													// 					res.status(500).json({message:"Error getting exam price"});	
-													// 				}else{
-													// 					dbHandlers.Qgen_pendent_payments.Qcreate_PendentPayment_exam(price[0].Value,
-													// 							temp_booking,tempstudent_license,(err,results)=>{
-													// 						if(err){
-													// 							console.log(err);
-													// 							res.status(500).json({message:"Error creating pendent payment"});
-													// 						}else{
-													// 							res.status(200).json({message:'Booking created!'});	
-													// 						};
-													// 					});	
-													// 				};
-													// 			});
-													// 		};
-													// 	};
-													// });
-													// return res.status(200).send({message:"Booking created"});
-												// };
-											// });
 										};
 									});		
 								};

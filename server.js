@@ -220,11 +220,16 @@ app.get('/api/estado-sicc',controllers.sicc_status.getSiccStatus);
 app.get('/api/easyPay',controllers.easyPay.updateMissingPayments);
 app.post('/api/easyPay',controllers.easyPay.POST_easyPay);
 // ------------------------------------------------------------------------------
+// Accounts routes
+app.get('/api/operadores',controllers.authorization.get_Accounts);
+// ------------------------------------------------------------------------------
 // Listagens routes
 // app.post('/api/centro-exames/:idExam_center/listagens',controllers.Lists.getLists);
 
 // Route External API location
-app.get('/api/localizacao',controllers.location.getlocation); 
+app.get('/api/localizacao',controllers.location.getlocation);
+
+
 
 server.listen(port, () => {
   console.log(`Started on port ${port}`);

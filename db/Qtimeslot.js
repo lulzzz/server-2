@@ -1,9 +1,11 @@
 // get all timeslots without pauta for given date
 var Qget_byDateTimeslot = (idexam_center,date,cb)=>{
-	return myQuery('SELECT Timeslot.* FROM Timeslot LEFT JOIN Pauta '+
-					'ON Timeslot.idTimeslot = Pauta.Timeslot_idTimeslot '+
-					'WHERE Pauta.Timeslot_idTimeslot IS NULL AND Timeslot.Exam_center_idExam_center = ? '+
-					'AND Timeslot.Timeslot_date = ? AND Timeslot.Exam_type_idExam_type IS NOT NULL',
+	return myQuery('SELECT * FROM Timeslot LEFT JOIN Pauta '+
+                    'ON Timeslot.idTimeslot = Pauta.Timeslot_idTimeslot '+
+                    'LEFT JOIN Booked ON Timeslot.idTimeslot = Booked.Timeslot_idTimeslot '+
+                    'WHERE Pauta.Timeslot_idTimeslot IS NULL AND Timeslot.Exam_center_idExam_center = ? '+
+                    'AND Timeslot.Timeslot_date = ? AND Timeslot.Exam_type_idExam_type IS NOT NULL '+
+                    'AND Booked.Timeslot_idTimeslot IS NOT NULL',
                     [idexam_center,date],(error, results, fields)=> {
 		error ? cb(error) : cb(false,results);
 	});

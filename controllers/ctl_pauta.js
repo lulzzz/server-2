@@ -94,16 +94,16 @@ var createPauta = async (req,res,next)=>{
 					dbHandlers.Qgen_pauta.Qget_MAXPautaNum(req.params.idExam_center,(err,results)=>{
 						if (err){
 							console.log(err);
-							res.status(500).json({message:"Error getting pauta numbers"});	
+							return res.status(500).json({message:"Error getting pauta numbers"});	
 						}else{
 							var temp_pauta_num=results[0].pauta_num;
-							// console.log("got max pauta " +JSON.stringify(results));
 							dbHandlers.Qgen_timeslot.Qget_byDateTimeslot(req.params.idExam_center,
 									req.body.Timeslot_date,(err,results)=>{	
-									console.log("got timeslot date")
-								if (err || results.length<=0){
+								if (err){
 									console.log(err);
-									res.status(500).json({message:"No records found in database"});		
+									return res.status(500).json({message:"No records found in database"});
+								}else if(results.length<=0){
+									return res.status(204).json({message:"No bookings for given day"});		
 								}else{
 									// array of promises to create pautas
 									var array_P_pautas=[];
@@ -114,11 +114,11 @@ var createPauta = async (req,res,next)=>{
 									});
 									Promise.all(array_P_pautas)
 			            				.then(()=>{
-											res.status(200).json({message:"Pautas created"});	
+											return res.status(200).json({message:"Pautas created"});	
 										}).catch((err)=>{
 							                // log that I have an error, return the entire array;
 							                console.log(err);
-							                res.status(500).json({message:"Database error creating pautas"});
+							                return res.status(500).json({message:"Database error creating pautas"});
 			            				});				
 								};
 							});		
@@ -576,18 +576,18 @@ var updatePauta = async (req,res,next)=>{
 	// randomize examiner and route for starting timeslots
 	}else if(req.query.start && req.body.Exam_center_idExam_center){
 		// get server time plus time_window.minutes
-		let time_now=moment().add(config.time_window.minutes,'m').format("H:mm:ss");
-		let date_now=moment().format("YYYY-MM-DD");
+		var time_now=moment().add(config.time_window.minutes,'m').format("H:mm:ss");
+		var date_now=moment().format("YYYY-MM-DD");
 
-		console.log("Search time "+ date_now +" with "+time_now);
+		// console.log("Search time "+ date_now +" with "+time_now);
 		// get next timeslots
 		dbHandlers.Qgen_timeslot.Qget_nextTimeslot(req.body.Exam_center_idExam_center,date_now.toString(),
 						time_now, (err,timeslots)=>{			
 			if (err){
 				console.log(err);
-				res.status(500).json({message:"Error getting timeslots"});	
+				return res.status(500).json({message:"Error getting timeslots"});	
 			}else if (timeslots.length<=0){
-				res.status(204).json({message:"No timeslots found"});		
+				return res.status(204).json({message:"No timeslots found"});		
 			}else{
 				dbHandlers.Qgen_accounts.Qget_byUserAccount(req.user.user, async (e,account)=>{
 					if(e){
@@ -597,24 +597,11 @@ var updatePauta = async (req,res,next)=>{
 						// -----------------------------------------------------
 						// Randomize examiners for given timeslots
 						var examiners = await P_randomize_examiners(req.body.Exam_center_idExam_center);
-											// Promise.all(P_randomize_examiners)
-											// 	.then(()=>{
-										    // // everything went ok
-														// 	}).catch((err)=>{
-											   //              // log that I have an error, return the entire array;
-												  //               console.log(err);
-												  //               return res.status(500).json({message:"Database error randomizing examiners"});
-										    // 				});
-						console.log("--------------------------------------------");
-						console.log("OS EXAMINADORES " + JSON.stringify(examiners));
-						console.log("OS EXAMINADORES " + JSON.stringify(examiners.length));
-						console.log("OS EXAMINADORES " + JSON.stringify(examiners[0][0]));
-						console.log("OS EXAMINADORES " + JSON.stringify(examiners[0][1]));
-						console.log("--------------------------------------------");
 						for (let i = 0; i < examiners.length; i++) {
 							dbHandlers.Qgen_pauta.Qupdate_Pauta_examiner(examiners[1],examiners[i],(e)=>{
 								if(e){
-									console.log("Database error writing examiners");
+									console.log(e);
+									return res.status(500).json({message:"Database error writing examiners"});
 								};
 							});
 						};
@@ -664,7 +651,15 @@ var updatePauta = async (req,res,next)=>{
 											});
 											Promise.all(arr_number_exams)
 												.then(()=>{
-													res.status(200).json({message:"Examiners defined and Exams created"});		
+													// creates final msg to send to client
+													dbHandlers.Qgen_pautas.Qget_SelectionPautas(req.body.Exam_center_idExam_center,date_now,time_now,(e,pautas)=>{
+														if(e){
+															console.log(e);
+															return res.status(500).json({message:"Database error getting randomize final results"});
+														}else{
+															return res.status(200).json(pautas);
+														};
+													});	
 												}).catch((err)=>{
 									                // log that I have an error, return the entire array;
 									                console.log(err);

@@ -46,28 +46,6 @@ passport.use(new LocalStrategy({
 	}
 ));
 
-// passport.use(new JWTStrategy({
-//         jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-//         secretOrKey   : config.backend.jwt_secret
-//     },
-//     function (jwtPayload, cb) {
-//     	if (jwtPayload.user){
-//     		dbHandlers.Qgen_accounts.Qget_byUserPermissions(jwtPayload.user,(err,results)=>{
-// 				if (err){
-// 					return err;
-// 				}else{
-// 					console.log("I GOT PERMISSIONS");
-// 					return results;
-// 				};
-// 	    	});
-//     		// return cb(jwtPayload.user);
-//     	}else{
-//     		return cb();
-//     	};
-    	
-//     }
-// ));
-
 passport.serializeUser(function(user, done) {
     //serialize by user id
     done(null, user._id)

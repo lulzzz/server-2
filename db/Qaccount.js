@@ -28,6 +28,15 @@ var Qget_byUserPermissions = (user,cb)=>{
 	});
 };
 
+var Qget_AllAcounts = (cb)=>{
+	return myQuery('SELECT role.role_name,account.Exam_center_name,account.User,account.User_email,account.status,school.school_name '+
+						'FROM account LEFT JOIN role ON account.Role_idRole=Role.idRole '+
+						'LEFT JOIN School ON account.School_idSchool=School.idSchool',
+						[null],(error, results, fields)=>{
+		error ? cb(error) : cb(false,results);
+	});
+};
+
 // create record for student 
 var Qcreate_Account = (values,cb)=>{
 	return myQuery ('INSERT INTO Account (User,Hash,Salt,User_name,User_email,In_session,Createdate,Updatedate,'+
@@ -50,6 +59,7 @@ module.exports = function(myQuery){
 		Qget_byUserAccount,
 		Qget_byIdAccount,
 		Qget_byUserPermissions,
+		Qget_AllAcounts,
 		Qcreate_Account,
 		Qupdate_Account
 	}

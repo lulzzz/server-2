@@ -52,6 +52,14 @@ var Qget_byProcessBookedID = (Process,cb) =>{
   });
 };
 
+//get Exam Status 
+var Qget_byProcessAprovedID = (Process,cb) =>{
+  return myQuery('SELECT idexam_status FROM T_exam_status WHERE Process = ? AND Status="Aprovado"',[Process],
+              (error, results, fields) =>{
+    error ? cb(error): cb(false,results)
+  });
+};
+
 //post Exam Status 
 var Qcreate_Exam_Status = (values,cb) =>{
   return myQuery('INSERT INTO T_exam_status (Status,Process) VALUES (?)',[values], (error, results, fields) =>{
@@ -82,6 +90,7 @@ module.exports = (myQuery) => {
     Qget_byProcessPendentID,
     Qget_byProcessCancelID,
     Qget_byProcessBookedID,
+    Qget_byProcessAprovedID,
     Qcreate_Exam_Status,
     Qdelete_byIdExam_Status,
     Qupdate_byIdExam_Status

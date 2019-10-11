@@ -32,7 +32,7 @@ var Qget_ForceAvailable=(idexam_center,idexam_type,day,time,cb)=>{
 						'WHERE Pauta.Timeslot_idTimeslot = Timeslot.idTimeslot '+
 						'AND Timeslot.Exam_center_idExam_center = ? '+
         				'AND Timeslot.Timeslot_date = ? '+
-        				'AND Timeslot.Begin_time < ? '+
+        				'AND Timeslot.Begin_time <= ? '+
         				'AND Timeslot.End_time > ? '+
         				'AND pauta.Examiner_qualifications_idExaminer_qualifications is not null) as t1 '+
         			'GROUP BY t1.quali '+
