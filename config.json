@@ -2,10 +2,10 @@
 	"db_conn":
 	  	{
 	  		"connectionLimit" : 100,
-			"host"            : "dev.mysql",
-			"user"            : "root",
-			"password"        : "root",
-			"database"        : "anieca"
+			"host"            : "eu-cdbr-west-02.cleardb.net",
+			"user"            : "bd054856aacb55",
+			"password"        : "2e207c21",
+			"database"        : "heroku_25f209348418839"
 		},
 	"backend": {
 		"port" : 4200,
