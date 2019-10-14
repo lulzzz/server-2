@@ -5,8 +5,8 @@ var validator = require('node-input-validator')
 var _ = require('lodash')
 
 var getList_TimeslotByWeek = async (req, res) => {
-	console.log("Getting timeslot");
-	console.log(req.query)
+	// console.log("Getting timeslot");
+	// console.log(req.query)
 	if (req.query.week <= 52 && req.query.year) {
 		let beginningOfWeek = moment().week(req.query.week).year(req.query.year).startOf('week').local().format('YYYY-MM-DD');
 		// console.log("beginningOfWeek " + beginningOfWeek);
@@ -43,10 +43,10 @@ var getList_TimeslotByWeek = async (req, res) => {
 		let resTimeslots = await pTimeslot, groups = await pGroups
 
 		if (resTimeslots === 0) {
-			return res.status(500).json({message: 'An error occured while trying to fetch timeslots.'})
+			return res.status(500).json({message: 'An error occured while trying to fetch timeslots.'});
 		};
 		if (groups === 0) {
-			return res.status(500).json({message: 'An error occured while trying to fetch groups.'})
+			return res.status(500).json({message: 'An error occured while trying to fetch groups.'});
 		};
 		// Structures message to appear the information about a day and then all the reservations 
 		// for that specific day
@@ -66,6 +66,8 @@ var getList_TimeslotByWeek = async (req, res) => {
 };
 
 var postList_Timeslot = async (req, res) => {
+	console.log("entrei no post")
+	console.log(req.body)
 	const tVal = new validator(req.body, Timeslot_Schema), matched = await tVal.check()
 	if (!matched) {
 		console.log(tVal.errors);
@@ -73,55 +75,45 @@ var postList_Timeslot = async (req, res) => {
 	}
 	// console.log("params "+req.params.idExam_center);
 	// Obtains the timeslot in which the client's Exam_date is inserted in
-	dbHandlers.Qgen_timeslot.Qget_TimeslotInDateTime(req.body.Timeslot_date, req.params.idExam_center, 
-					req.body.Exam_group, (error, dbTimeslot) => {
+	dbHandlers.Qgen_timeslot.Qget_TimeslotInDateTime(req.body.Timeslot_date,req.body.Begin_time,
+			req.body.End_time,req.params.idExam_center,req.body.Exam_group, (error, dbTimeslot) => {
 		if (error) {
 			console.log(error);
 			return res.status(500).json({message: 'There was an error while trying to validate entry.'});
-		};
-		if (dbTimeslot.length !== 0) {
+		}else if (dbTimeslot.length !== 0) {
 			return res.status(400).json({message: 'Can\'t add a timeslot. It already exists.'});
 		};
-		// Gets Exam type
-		// dbHandlers.Qgen_exam_type.Qget_byIdExam_type(req.body.Exam_type_idExam_type,(error, exam_type)=>{
-		// 	if (error) {
-		// 		console.log(error);
-		// 		return res.status(500).json({message: 'There was an error while trying to get the duration of the exam.'});
-		// 	};
-		// 	if (exam_type.length === 0) {
-		// 		return res.status(400).json({message: 'Exam type does not exist.'});
-		// 	};
-
-			// Gets groups by day
-			dbHandlers.Qgen_groups.Qget_groupsByDay(req.body.Timeslot_date.substring(0, 10),req.params.idExam_center,(error,groups)=>{
+		// Gets groups by day
+		dbHandlers.Qgen_groups.Qget_groupsByDay(req.body.Timeslot_date.substring(0, 10),req.params.idExam_center,(error,groups)=>{
+			if (error) {
+				console.log(error);
+				return res.status(500).json({message: 'There was an error while trying to get groups.'});
+			};
+			if (groups.length === 0) {
+				return res.status(400).json({message: 'Groups for chosen day not found.'});
+			};
+			if (req.body.Exam_group <= 0 || req.body.Exam_group > groups[0].MAX_Group) {
+				return res.status(400).json({message: 'Invalid group entry.'})
+			};
+			// Adds timeslot
+			// End_time: moment.unix(moment.utc('1970-01-01 ' + exam_type[0].Duration, "YYYY-MM-DD HH:mm:ss").unix() + moment(req.body.Begin_time).unix()).format("YYYY-MM-DD HH:mm:ss"), 
+			dbHandlers.Qgen_timeslot.Qpost_timeslot([req.body.Timeslot_date,req.body.Begin_time,req.body.End_time,req.body.Exam_group,req.body.Exam_type_idExam_type,
+				req.params.idExam_center], (error) => {
 				if (error) {
 					console.log(error);
-					return res.status(500).json({message: 'There was an error while trying to get groups.'});
+					return res.status(500).json({message: 'An error has occurred while trying to add a timeslot.'})
+				}else{
+					return res.status(200).json({message: 'Timeslot added.'});	
 				};
-				if (groups.length === 0) {
-					return res.status(400).json({message: 'Groups for chosen day not found.'});
-				};
-				if (req.body.Exam_group <= 0 || req.body.Exam_group > groups[0].MAX_Group) {
-					return res.status(400).json({message: 'Invalid group entry.'})
-				};
-				// Adds timeslot
-				// End_time: moment.unix(moment.utc('1970-01-01 ' + exam_type[0].Duration, "YYYY-MM-DD HH:mm:ss").unix() + moment(req.body.Begin_time).unix()).format("YYYY-MM-DD HH:mm:ss"), 
-				dbHandlers.Qgen_timeslot.Qpost_timeslot([req.body.Timeslot_date,req.body.Begin_time,req.body.End_time,req.body.Exam_group,req.body.Exam_type_idExam_type,
-					req.params.idExam_center], (error) => {
-					if (error) {
-						console.log(error);
-						return res.status(500).json({message: 'An error has occurred while trying to add a timeslot.'})
-					}else{
-						return res.status(200).json({message: 'Timeslot added.'});	
-					};
-				});
 			});
-		// });
+		});
 	});
 };
 
 var patchList_Timeslot = async (req, res) => {
 	if (req.query.idTimeslot) {
+		console.log("entrei no patch")
+		console.log(req.body)
 		// const timeslotObj = _.pick(req.body,['Exam_endDate','Exam_type_idExam_type']);
 		const timeslotObj = req.body
 		// If client wants to change when timeslot finishes

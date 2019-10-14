@@ -64,14 +64,13 @@ var bulk = async () => {
                         // var student = req.body.Student_name
                         // var tax_num = req.body.tax_num
                         var idEasyPay = body.id
-
                         // new method to patch multiple reservations
                         dbHandlers.Qgen_reservations.Qpatch_reservationArray({ idEasyPay }, element.idReservation, (error) => { // Unlocks reservation
                             if (error) {
                                 console.log(error);
                                 // return res.status(500).json({ message: 'There was an error while trying to update the reservation (idEasyPay).' });
                             } else {
-                                console.log('done');
+                                // console.log('done');
                                 // TODO ainda é para enviar através do examcenter?
                                 dbHandlers.Qgen_exam_center.Qget_smtpCredencials(element.Exam_center_idExam_center, (err, smtpResults) => {
                                     if (err || smtpResults <= 0) {

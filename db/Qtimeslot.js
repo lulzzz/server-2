@@ -35,12 +35,12 @@ var Qget_timeslotByWeek = (idcancel,iDay, fDay, idExam_center, cb) => {
     });
 };
 
-var Qget_TimeslotInDateTime = (Exam_date, idExam_center, Exam_group, cb) => {
+var Qget_TimeslotInDateTime = (Exam_date,Begin_time,End_time, idExam_center, Exam_group, cb) => {
     return myQuery("SELECT Timeslot.*, Duration, Num_students " + 
             "FROM Timeslot LEFT JOIN Exam_type ON Timeslot.Exam_type_idExam_type=Exam_type.idExam_type " +
-            "WHERE ? >= Timeslot.Begin_time AND ? < Timeslot.End_time AND Exam_center_idExam_center=? " +
+            "WHERE Timeslot.Timeslot_date = ? AND ? >= Timeslot.Begin_time AND ? <= Timeslot.End_time AND Exam_center_idExam_center=? " +
             "AND Exam_group=? AND Timeslot.Exam_type_idExam_type IS NOT NULL",
-            [Exam_date, Exam_date, idExam_center, Exam_group],(error,results,fields) => {
+            [Exam_date, Begin_time,End_time, idExam_center, Exam_group],(error,results,fields) => {
         error ? cb(error) : cb(false,results);
     });
 };
@@ -109,11 +109,11 @@ module.exports = function(myQuery){
 	return {
 		Qget_byDateTimeslot,
 		Qget_nextTimeslot,
-        Qget_byIdTimeslot,
+    Qget_byIdTimeslot,
 		Qget_timeslotByWeek,
 		Qget_TimeslotInDateTime,
 		Qget_timeslotById,
-        Qget_countTimeslot,
+    Qget_countTimeslot,
 		Qpost_timeslot,
 		Qdelete_timeslot,
 		Qpatch_timeslot

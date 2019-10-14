@@ -8,6 +8,7 @@ var nodemailer = require('nodemailer');
 var request=require('request');
 var moment=require('moment');
 var multer = require('multer');
+const fs = require('fs');
 
 // Request handlers
 var getList_ReservationsByIdTimeslot = async (req, res)=>{
@@ -138,34 +139,56 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 var postList_Reservations=async(req,res)=>{
 	if(req.query.idReservation && req.query.file){
 		console.log("ENTREI AQUI")
-		 // console.log(req.file);
+	
+		// console.log(req.file);
 		// var upload = multer({ dest: './' }).single('file');
-
-
 
 		// var upload = multer({ 
 		// 	storage: multer.diskStorage({
-	 //        	destination: function (req, file, cb) {
-	 //    			cb(null, './');
-	 // 	 		},
-	 //  			filename: function (req, file, cb) {
-	 //    			cb(null, file.originalname);
-	 //  			}
+		//        	destination: function (req, file, cb) {
+		//    			cb(null, './');
+		// 	 		},
+		//  			filename: function (req, file, cb) {
+		//    			cb(null, file.originalname);
+		//  			}
 		// 	})
 		
 		// });
 		// console.log(upload)
-        // upload(req, res, function (err) {
-        //     if (err instanceof multer.MulterError) {
-        //         console.log(err.message);
-        //         return res.status(406).json({message:"Bad format file"});
-        //     } else if (err) {
-        //         console.log(err.message);
-        //         return res.status(400).json({message:"Bad request"})
-        //     }
-        //     return res.status(200).json({message:"OK"});
-        // });
+	    // upload(req, res, function (err) {
+	    //     if (err instanceof multer.MulterError) {
+	    //         console.log(err.message);
+	    //         return res.status(406).json({message:"Bad format file"});
+	    //     } else if (err) {
+	    //         console.log(err.message);
+	    //         return res.status(400).json({message:"Bad request"})
+	    //     }
+	    //     return res.status(200).json({message:"OK"});
+	    // });
 
+		// var file = req.files.file;
+		// var source = fs.createReadStream(file.path);
+		// var dest;
+
+		// // destination directory
+		// var dest_dir = './uploads;
+		// var filename = file.name;
+
+		// fs.readdir(dest_dir, function(err, dir_files) {
+		//     for(var i = 0; i < dir_files.length; i++) {
+		//         if(dir_files[i] == filename) {
+		//             console.log("I can see this message, but the file isn't renamed");
+		//             filename = filename + '_1'; // rename the file
+		//             break;
+		//         }
+		//     }
+
+		//     dest = fs.createWriteStream(dest_dir + '/' + filename);
+		//     source.pipe(dest);
+
+		//  });
+		//  source.on('end', function() { res.json("File has been uploaded!") });
+		//  source.on('error', function(err) { res.json("There was an error when attempting to upload this file.") });
 
 
 	}else if (!req.query.search){

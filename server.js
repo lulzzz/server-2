@@ -18,8 +18,8 @@ var port = process.env.PORT || config.backend.port;
 
 var rule = new schedule.RecurrenceRule();
 // rule.dayOfWeek = [0, 6];
-rule.hour = 16;
-rule.minute = 42;
+rule.hour = 23;
+rule.minute = 00;
 rule.dayOfWeek = [0, new schedule.Range(0, 6)];
 
 var j = schedule.scheduleJob(rule, function(){
