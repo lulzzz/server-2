@@ -117,33 +117,33 @@ var patchList_Timeslot = async (req, res) => {
 		// const timeslotObj = _.pick(req.body,['Exam_endDate','Exam_type_idExam_type']);
 		const timeslotObj = req.body
 		// If client wants to change when timeslot finishes
-		if (timeslotObj.Exam_endDate){ 
-			await new Promise((resolve)=>{
-				dbHandlers.Qgen_timeslot.Qget_timeslotById(req.query.idTimeslot, req.params.idExam_center, (error, timeslot) => { // Gets timeslot by id
-					if (error) {
-						return res.status(500).send({message: 'There was an error while trying to fetch the timeslot.'});
-					};
-					if (timeslot.length === 0) {
-						return res.status(400).send({message: 'Timeslot doesn\'t exist.'});
-					};
-					// Gets the timeslot in which the Exam_endDate is inserted in
-					dbHandlers.Qgen_timeslot.Qget_TimeslotInDateTime(timeslotObj.Exam_endDate, 
-							req.params.idExam_center, timeslot[0].Timeslot_Group,(error, timeslot)=>{
-						if (error) {
-							return res.status(500).send({message: 'There was an error while trying to check the new position and size of the timeslot.'});
-						};
-						// It's possible to change the timeslot's endDate to the value from the client
-						if (timeslot.length === 0 || 
-								timeslot[0].idTimeslot.toString() === req.query.idTimeslot || 
-								timeslot[0].Exam_date === timeslotObj.Exam_endDate) { 
-							return resolve();
-						} else {
-							return res.status(500).send({message: 'It isn\'t possible to update the timeslot date to the desired time.'});
-						};
-					});
-				});
-			});
-		};
+		// if (timeslotObj.Exam_endDate){ 
+		// 	await new Promise((resolve)=>{
+		// 		dbHandlers.Qgen_timeslot.Qget_timeslotById(req.query.idTimeslot, req.params.idExam_center, (error, timeslot) => { // Gets timeslot by id
+		// 			if (error) {
+		// 				return res.status(500).send({message: 'There was an error while trying to fetch the timeslot.'});
+		// 			};
+		// 			if (timeslot.length === 0) {
+		// 				return res.status(400).send({message: 'Timeslot doesn\'t exist.'});
+		// 			};
+		// 			// Gets the timeslot in which the Exam_endDate is inserted in
+		// 			dbHandlers.Qgen_timeslot.Qget_TimeslotInDateTime(timeslotObj.Exam_endDate, 
+		// 					req.params.idExam_center, timeslot[0].Timeslot_Group,(error, timeslot)=>{
+		// 				if (error) {
+		// 					return res.status(500).send({message: 'There was an error while trying to check the new position and size of the timeslot.'});
+		// 				};
+		// 				// It's possible to change the timeslot's endDate to the value from the client
+		// 				if (timeslot.length === 0 || 
+		// 						timeslot[0].idTimeslot.toString() === req.query.idTimeslot || 
+		// 						timeslot[0].Exam_date === timeslotObj.Exam_endDate) { 
+		// 					return resolve();
+		// 				} else {
+		// 					return res.status(500).send({message: 'It isn\'t possible to update the timeslot date to the desired time.'});
+		// 				};
+		// 			});
+		// 		});
+		// 	});
+		// };
 		// Updates the timeslot
 		dbHandlers.Qgen_timeslot.Qpatch_timeslot(timeslotObj, req.query.idTimeslot,(error)=>{ 
 			if (error) {

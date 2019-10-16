@@ -37,5 +37,8 @@
 	},
 	"special_offers":{
 		"TM_exams":10
+	},
+	"files":{
+		"reservations_model2":"./reservas"
 	}
 }
