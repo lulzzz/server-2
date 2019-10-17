@@ -20,10 +20,10 @@
 		"Exams":"Exames"
 	},
 	"api_invoice":{
-		"url":"http://192.168.0.122:3000/invoices",
-		"url_customer":"http://192.168.0.122:3000/customers",
-		"url_product":"http://192.168.0.122:3000/products",
-		"url_saft":"http://192.168.0.122:3000/saft"
+		"url":"https://kbz-invoicing.herokuapp.com/invoices",
+		"url_customer":"https://kbz-invoicing.herokuapp.com/customers",
+		"url_product":"https://kbz-invoicing.herokuapp.com/products",
+		"url_saft":"https://kbz-invoicing.herokuapp.com/saft"
 	},
 	"imtt_url":{
 		"imtt_login":"http://parcerias.imtt.pt/login.php",
