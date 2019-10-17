@@ -5,7 +5,6 @@ const csv = require('fast-csv');
 var config=require('../config.json');
 var dbHandlers = require("../db");
 
-
 var getPEP = (req, res)=>{
     try {
         var conditions = ['Booked.Exam_center_idExam_center = ?'];
@@ -19,14 +18,13 @@ var getPEP = (req, res)=>{
             values.push(req.body.Timeslot_date1);
             values.push(req.body.Timeslot_date2);
         };
-
         // se não for especificado, vai buscar os resultados não enviados ou com erros
         if (typeof req.body.idsicc_status !== 'undefined') {
             conditions.push('booked.sicc_status_idsicc_status = ?');
             values.push(req.body.idsicc_status);
         } else {
             conditions.push('(booked.sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 1 AND operation = 1) OR booked.sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 1 AND operation = 3))');
-        }
+        };
         if (typeof req.body.Pauta_num !== 'undefined') {
             conditions.push('pauta.Pauta_num = ?');
             values.push(req.body.Pauta_num);
@@ -39,20 +37,17 @@ var getPEP = (req, res)=>{
             conditions.push('exam_type.idExam_type = ?');
             values.push(req.body.idExam_type);
         };
-
         conditionsStr = conditions.length ? conditions.join(' AND ') : '1';
-
-        console.log("TESTE    " + conditionsStr)
-
+        // console.log("TESTE    " + conditionsStr)
         dbHandlers.Qgen_imtt.Qget_search_PEP(conditionsStr, values, (err, PEP) => {
             if (err) {
                 console.log(err.message);
                 return res.status(500).json({message:"Database error fetching PEP"});
             } else if (PEP.length === 0) {
-                return res.status(204).json("No records found");
+                return res.status(204).json({message:"No candidates to issue"});
             }else{
                 return res.status(200).json(PEP);    
-            }
+            };
         });
     } catch (error) {
         console.log(error.message);
@@ -81,35 +76,31 @@ var getREP = (req, res)=>{
             conditions.push('student_license.Student_license = ?');
             values.push(req.body.Student_license);
         };
-
         // se não for especificado, vai buscar os resultados não enviados ou com erros
         if (typeof req.body.idsicc_status !== 'undefined') {
             conditions.push('exam.sicc_status_idsicc_status = ?');
             values.push(req.body.idsicc_status);
         } else {
             conditions.push('(exam.sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 3 AND operation = 1) OR exam.sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 3 AND operation = 3))');
-        }
-
+        };
         if (typeof req.body.idExam_type !== 'undefined') {
             conditions.push('exam_type.idExam_type = ?');
             values.push(req.body.idExam_type);
         };
-
         conditionsStr = conditions.length ? conditions.join(' AND ') : '1';
-
         dbHandlers.Qgen_imtt.Qget_search_REP(conditionsStr, values, (err, REP) => {
             if (err) {
                 console.log(err.message);
                 return res.status(500).json({message:"Database error fetching REP"});
             } else if (results.length === 0) {
-                return res.status(204).send("No records found")
+                return res.status(204).json({message:"No records found"});
             }else{
                 return res.status(200).json(REP);
             };
         });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).send({message:"Database error creating file"});
+        return res.status(500).json({message:"Database error creating file"});
     };
 };
 
@@ -126,17 +117,14 @@ var getETC = (req, res)=>{
             values.push(req.body.Timeslot_date1);
             values.push(req.body.Timeslot_date2);
         };
-
         // se não for especificado, vai buscar os resultados não enviados ou com erros
         if (typeof req.body.idsicc_status !== 'undefined') {
             conditions.push('student_license.T_sicc_status_idsicc_status = ?');
             values.push(req.body.idsicc_status);
         } else {
             conditions.push('(student_license.T_sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 2 AND operation = 1) OR student_license.T_sicc_status_idsicc_status = (select idsicc_status from t_sicc_status where process = 2 AND operation = 3))');
-        }
-
+        };
         conditionsStr = conditions.length ? conditions.join(' AND ') : '1';
-
         dbHandlers.Qgen_imtt.Qget_search_ETC(conditionsStr, values, (err, ETC) => {
             if (err) {
                 console.log(err.message);
@@ -149,15 +137,15 @@ var getETC = (req, res)=>{
         });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).send({message:"Database error creating file"});
+        return res.status(500).json({message:"Database error creating file"});
     };
 };
-
 
 /**
  * Scrape response html for PEP, REP or ETC errors
  * @param {html} body 
  */
+
 function scrapeHTML(body) {
     var tmp = []
     var errors = []
@@ -209,7 +197,7 @@ function sendFile(idexam_center,fileType, fileName, res) {
             request(loginOptions, function optionalCallback(err, httpResponse, body) {
                 if (err) {
                     return console.error('login failed:', err);
-                }else {
+                } else {
                     console.log('login successful');
                     request(sendFilePEPOptions, function optionalCallback(err, httpResponse, body) {
                         if (err) {
@@ -221,15 +209,16 @@ function sendFile(idexam_center,fileType, fileName, res) {
                     });
                 };
             });
-        }
+        };
     });
-}
+};
 
 /**
  * Build the previous and the current filename
  * @param {string} fileType type of file being generated (PEP, REP or ETC). must be in caps
  * @param {function} cb callback
  */
+
 const filenames = (fileType, cb) => {
 
     dbHandlers.Qgen_imtt.Qget_sicc_info(fileType,(error,results)=>{
@@ -271,6 +260,7 @@ const filenames = (fileType, cb) => {
  *      - exam_type: "idExam_type": "6"
  *      - Pauta number: "Pauta_num": 1
  */
+
 function PEP(req, res) {
     try {
         var conditions = ['Booked.Exam_center_idExam_center = ?'];
@@ -313,13 +303,13 @@ function PEP(req, res) {
                 return res.status(500).json({message:"Database error fetching PEP"});
             } else {
                 if (results.length === 0) {
-                    return res.status(204).json("No records found");
+                    return res.status(204).json({message:"No records found"});
                 }
                 // generate previous and current filenames
                 filenames('PEP', (err, filenames) => {
                     if (err) {
                         console.log(err.message);
-                        return res.status(400).send({message:"Database error creating PEP"});
+                        return res.status(400).json({message:"Database error creating PEP"});
                     }
 
                     var pep = {
@@ -372,7 +362,7 @@ function PEP(req, res) {
 
                     var csvData = []
                     for (const element of pep.data) {
-                        csvData.push(Object.values(element).join(';').replace('\'', ''))
+                        csvData.push(Object.values(element).join(';').replace('\'', ''));
                     }
 
                     var csvFooter = Object.values(pep.footer).join(';').replace('\'', '');
@@ -380,13 +370,13 @@ function PEP(req, res) {
                     var logStream = fs.createWriteStream(pep.header.currentFileName);
 
                     logStream.write(csvHeader);
-                    logStream.write('\n')
+                    logStream.write('\n');
                     if (csvData.length !== 0) {
                         logStream.write(csvData.join('\n'));
-                        logStream.write('\n')
+                        logStream.write('\n');
                     }
                     logStream.write(csvFooter);
-                    logStream.end('\n')
+                    logStream.end('\n');
 
                     logStream.on('finish', function () {
                         res.contentType('text/csv')
@@ -406,9 +396,9 @@ function PEP(req, res) {
         })
     } catch (error) {
         console.log(error.message);
-        res.status(500).send({message:"Database error creating file"});
-    }
-}
+        return res.status(500).json({message:"Database error creating file"});
+    };
+};
 
 /**
  * Enviar resultado de provas
@@ -422,6 +412,7 @@ function PEP(req, res) {
  *      - exam_type: "idExam_type": "6"
  *      - Pauta number: "Pauta_num": 1
  */
+
 function REP(req, res) {
     try {
         var conditions = ['Booked.Exam_center_idExam_center = ?'];
@@ -456,7 +447,6 @@ function REP(req, res) {
             conditions.push('exam_type.idExam_type = ?');
             values.push(req.body.idExam_type);
         };
-
         conditionsStr = conditions.length ? conditions.join(' AND ') : '1';
 
         dbHandlers.Qgen_imtt.Qget_search_REP(conditionsStr, values, (err, results) => {
@@ -465,13 +455,13 @@ function REP(req, res) {
                 return res.status(500).json({message:"Database error fetching REP"});
             } else {
                 if (results.length === 0) {
-                    return res.status(204).send("No records found")
+                    return res.status(204).json({message:"No records found"});
                 }
                 // generate previous and current filenames
                 filenames('REP', (err, filenames) => {
                     if (err) {
                         console.log(err.message);
-                        return res.status(400).send({message:"Database error creating REP"});
+                        return res.status(400).json({message:"Database error creating REP"});
                     }
                     var rep = {
                         header: {
@@ -561,7 +551,7 @@ function REP(req, res) {
         })
     } catch (error) {
         console.log(error.message);
-        res.status(500).send({message:"Database error creating file"});
+        res.status(500).json({message:"Database error creating file"});
     }
 }
 
@@ -604,13 +594,13 @@ function ETC(req, res) {
                 return res.status(500).json({message:"Database error fetching ETC"});
             } else {
                 if (results.length === 0) {
-                    return res.status(204).send("No records found")
+                    return res.status(204).json({message:"No records found"});
                 }
                 // generate previous and current filenames
                 filenames('ETC', (err, filenames) => {
                     if (err) {
                         console.log(err.message);
-                        return res.status(400).send({message:"Database error creating ETC"});
+                        return res.status(400).json({message:"Database error creating ETC"});
                     }
                     var etc = {
                         header: {
@@ -685,7 +675,7 @@ function ETC(req, res) {
 
     } catch (error) {
         console.log(error.message);
-        res.status(500).send({message:"Database error creating file"});
+        res.status(500).json({message:"Database error creating file"});
     }
 }
 
@@ -738,7 +728,7 @@ var POST_sicc= async (req,res,next)=>{
                     return res.status(400).json({message:'Invalid file'});
                 }
                 else if (fileRows.length === 0) {
-                    return res.status(400).send({message:'Empty file'});
+                    return res.status(400).json({message:'Empty file'});
                 }
                 else {
                     if (fileName.match(/^(PEP).*$/i)) {

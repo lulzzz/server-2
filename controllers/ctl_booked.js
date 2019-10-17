@@ -273,7 +273,6 @@ var deleteBooking = (req,res,next)=>{
 // UPDATE request for bookings
 var updateBooking = (req,res,next)=>{
 	if(req.query.idBooked){
-		console.log(req.body)
 		if(req.body.Exam_num||req.body.Pauta_num||req.body.Booked_date||req.body.Exam_date||req.body.Obs||
 						req.body.Student_license_idStudent_license||req.body.Exam_center_idExam_center||
 						req.body.Exam_type_idExam_type||req.body.T_exam_status_idexam_status){
