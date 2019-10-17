@@ -5,41 +5,44 @@ var _=require('lodash');
 // GET request for school (superuser)
 var getList_AllRoles = (req,res,next)=>{
 	if(req.query.idrole){
-		dbHandlers.Qgen_roles.Qget_byIdRole(req.query.idrole,function(err,results){
+		dbHandlers.Qgen_roles.Qget_byIdRole(req.query.idrole,(err,results)=>{
 			if(err){
-				res.status(500).send(err);
+				console.log(err);
+				return res.status(500).json({message:"Database error fetching role"});
 			}else if(results.length<=0){
-				res.status(204).send();	
+				return res.status(204).json({message:"No role found"});	
 			}else{
-				// res.status(200).json(results);
 				// TODO GET FUNCTIONALITIES
-			}
+				
+
+
+
+				return res.status(200).json(results);
+			};
 		});
 	}else{
-		dbHandlers.Qgen_roles.Qget_AllRoles(function(err,results){
+		dbHandlers.Qgen_roles.Qget_AllRoles((err,results)=>{
 			if(err){
-				res.status(500).send(err);
+				console.log(err);
+				return res.status(500).json({message:"Database error fetching roles"});
 			}else if(results.length<=0){
-				res.status(204).send();	
+				return res.status(204).json({message:"No roles found"});	
 			}else{
-				res.status(200).json(results);
-			}
+				return res.status(200).json(results);
+			};
 		});	
-	}
+	};
 };
 
 var create_Roles=(req,res,next)=>{
-	console.log("Creating Role");
-	console.log(req.body);
-	console.log("--------------------------------");
 	dbHandlers.Qgen_roles.Qcreate_Role([req.body.Role_name,req.body.Obs],(err,results)=>{
 		if(err){
 			// fail inserting
-			res.status(500).send(err);	
+			console.log(err);
+			return res.status(500).json({message:"Database error creating role"});	
 		}else{
 			// sucess
 			let tempId=results.insertId;
-			console.log("Role created with ID" + tempId);
 			// if (req.body.Funcionalities){
 			if (req.body.list_functions){
 				// ctl_functionality.create_Functionality(tempId,req.body.Funcionalities,(err,message)=>{
@@ -48,15 +51,15 @@ var create_Roles=(req,res,next)=>{
 						// fail inserting
 						dbHandlers.Qgen_roles.Qdelete_byIdRole(tempId,(err,results)=>{
 							console.log("Role deleted by default");
-							res.status(500).send(results);
+							return res.status(500).json({message:"Database error creating functionalities in role"});
 						});		
 					}else{
 						// role created with all functionalities
-						res.status(200).send({message:`Role ${req.body.Role_name} created.`});
+						return res.status(200).json({message:`Role ${req.body.Role_name} created.`});
 					};
 				});
 			}else{
-				res.status(200).send();	
+				return res.status(200).json({message:`Role ${req.body.Role_name} created.`});	
 			};
 		};
 	});
@@ -64,17 +67,18 @@ var create_Roles=(req,res,next)=>{
 
 var delete_Roles=(req,res,next)=>{
 	if(req.query.idRole){
-		dbHandlers.Qgen_roles.Qdelete_byIdRole(req.query.idRole, function(err,results){
+		dbHandlers.Qgen_roles.Qdelete_byIdRole(req.query.idRole, (err,results)=>{
 			if(err){
 				// internal error
-				return res.status(500).send(err);
+				console.log(err);
+				return res.status(500).json({message:"Database error deleting role"});
 			}else{
-				return res.status(200).json(results);
+				return res.status(200).json({message:"Role deleted"});
 			};
 		});
 	}else{
 		// missing id for this request
-		res.status(400).send("Missing params");	
+		return res.status(400).json({message:"Bad request"});	
 	};
 };
 
@@ -84,32 +88,38 @@ var update_Roles=(req,res,next)=>{
 		dbHandlers.Qgen_roles.Qupdate_byIdRole(req.query.idRole,Params_role,(err,results)=>{
 			if(err){
 				// internal error
-				return res.status(500).send(err);
+				console.log(err);
+				return res.status(500).json("Database error updating role");
 			}else{
 				// return res.status(200).json(results);
 				if(req.body.Funcionalities){
 					dbHandlers.Qgen_functionalities.Qdelete_byRoleFunctionality(req.query.idRole,
 											(err,results)=>{
 						if(err){
-							return res.status(500).send(err);	
+							console.log(err);
+							return res.status(500).json({message:"Database error deleting previous roles"});	
 						}else{
 							ctl_functionality.create_Functionality(req.query.idRole,req.body.Funcionalities,
 											(err,message)=>{
 								if (err){
-									return res.status(500).send(err);	
+									console.log(err);
+									return res.status(500).json({message:"Database error updating role"});	
 								}else{
-									res.status(200).send({message:`Role modified.`});	
+									return res.status(200).json({message:`Role modified.`});	
 								};
 							});	
 						};
 					});
 				}else{
-					return res.status(200).json(results);
+					return res.status(200).json({message:`Role modified.`});
 				};
 			};	
 		});
-	}
-}
+	}else{
+		// missing id for this request
+		return res.status(400).json({message:"Bad request"});	
+	};
+};
 
 module.exports = {
 	getList_AllRoles,

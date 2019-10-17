@@ -384,12 +384,12 @@ function PEP(req, res) {
                         // sendFile(req.params.idExam_center,7, '119_00000000.pep', res)
                         // TODO delete file? upload file to FTP
                         results.forEach(element => {
-                            dbHandlers.Qgen_booked.Qupdate_Booking_SiccStatus(element.idBooked,2,(err, result)=>{
+                            dbHandlers.Qgen_booked.Qupdate_Booking_SiccStatus(element.idBooked,2,(err, result) => {
                                 if (err) throw err;
                                 console.log(result.affectedRows + " record(s) updated");
                             });
                         });
-                        return res.status(200).json({message:"File sent successfully"});
+                        return res.status(200).json({message:"File " + pep.header.currentFileName + " sent successfully"});
                     });
                 })
             };
@@ -544,14 +544,14 @@ function REP(req, res) {
                                 console.log(result.affectedRows + " record(s) updated");
                             });
                         });
-                        // return res.status(200).json({message:"File sent successfully"});
+                        return res.status(200).json({message:"File " + rep.header.currentFileName + " sent successfully"});
                     });
                 })
             }
         })
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({message:"Database error creating file"});
+        return res.status(500).json({message:"Database error creating file"});
     }
 }
 
@@ -667,15 +667,14 @@ function ETC(req, res) {
                                 console.log(result.affectedRows + " record(s) updated");
                             });
                         });
-                        // return res.status(200).json({message:"File sent successfully"});
+                        return res.status(200).json({message:"File " + etc.header.currentFileName + " sent successfully."});
                     });
                 })
             }
         })
-
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({message:"Database error creating file"});
+        return res.status(500).json({message:"Database error creating file"});
     }
 }
 
