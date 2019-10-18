@@ -138,7 +138,7 @@ var Qget_byTaxnumReservations = (tax_num,idExam_center,cb)=>{
 };
 
 var Qget_byIdEasyPay = (idEasyPay, cb) => {
-    return myQuery("SELECT idReservation, idPendent_payments, idEasyPay, Exam_price, Exam_center_idExam_center FROM anieca.reservation " +
+    return myQuery("SELECT idReservation, idPendent_payments, idEasyPay, Exam_price, Exam_center_idExam_center FROM reservation " +
         "inner join pendent_payments on reservation.idReservation = pendent_payments.Reservation_idReservation " +
         "inner join timeslot on reservation.Timeslot_idTimeslot = timeslot.idTimeslot " +
         "where idEasyPay = ?",
@@ -149,8 +149,8 @@ var Qget_byIdEasyPay = (idEasyPay, cb) => {
 
 // get easyPay references that don't have a payment
 var Qget_reservationWithouthEasyPayId = (cb) => {
-    return myQuery('SELECT idReservation, Exam_price, School_permit, Timeslot.Exam_center_idExam_center FROM anieca.reservation ' + 
-        'Inner join anieca.pendent_payments on pendent_payments.Reservation_idReservation = reservation.idReservation ' + 
+    return myQuery('SELECT idReservation, Exam_price, School_permit, Timeslot.Exam_center_idExam_center FROM reservation ' + 
+        'Inner join pendent_payments on pendent_payments.Reservation_idReservation = reservation.idReservation ' + 
         'inner join temp_student on temp_student.Reservation_idReservation = reservation.idReservation ' +
         'left join timeslot on reservation.Timeslot_idTimeslot = Timeslot.idTimeslot ' +
         'where reservation.idEasypay IS NULL AND reservation.Lock_expiration_date IS NULL', [null],(error, results, fields) => {

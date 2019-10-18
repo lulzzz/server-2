@@ -11,18 +11,18 @@ require("./controllers").passport;
 // var passport = require("./controllers").passport;
 const publicPath=path.join(__dirname, '../public');
 
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 var config = require('./config.json');
 var port = process.env.PORT || config.backend.port;
 
 var rule = new schedule.RecurrenceRule();
 // rule.dayOfWeek = [0, 6];
-rule.hour = 23;
-rule.minute = 00;
+rule.hour = config.easy_pay.timer_hour;
+rule.minute = config.easy_pay.timer_min;
 rule.dayOfWeek = [0, new schedule.Range(0, 6)];
 
-var j = schedule.scheduleJob(rule, function(){
+var j = schedule.scheduleJob(rule, () => {
   console.log('EasyPay pending reservations');
   controllers.easyPay.bulk();
 });
@@ -34,6 +34,7 @@ app.use(express.static(publicPath));
 app.use(cors());
 // requires the use bodyParser for messages
 app.use(bodyParser.json());
+
 // ---------------------passport---------------------
 app.use(passport.initialize());
 app.use(passport.session());

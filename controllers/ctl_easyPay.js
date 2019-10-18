@@ -11,7 +11,7 @@ var bulk = async () => {
         if (error) {
             console.log(error);
             // return res.status(500).json({ message: "Error getting EasyPay ids." });
-        } else if (result.lenght > 0) {
+        } else if (result.length > 0) {
             var withouthids = JSON.parse(JSON.stringify(result));
             // map results from bd to grou by school and put idReservation in array
             // TODO verificar que user criou e se pagou em dinheiro
