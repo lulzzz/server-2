@@ -23,21 +23,23 @@ var Qget_nextTimeslot=(idexam_center,date,time,cb)=>{
 };
 
 var Qget_timeslotByWeek = (idcancel,iDay, fDay, idExam_center, cb) => {
-    return myQuery("SELECT Timeslot.*, Exam_type_name, Num_students as Max_Num_Students, " +
+    return myQuery("SELECT Timeslot.*, Exam_type.Exam_type_name,Type_category.Category, Num_students as Max_Num_Students, " +
             "count(if(reservation.T_exam_status_idexam_status !=?,1,null)) as number_Reservations " +
             "FROM timeslot " +
             "LEFT JOIN reservation ON timeslot.idTimeslot=reservation.Timeslot_idTimeslot " +
             "LEFT JOIN Exam_type ON timeslot.Exam_type_idExam_type=Exam_type.idExam_type " +
+            "LEFT JOIN Type_category ON Exam_type.Type_category_idType_category=Type_category.idType_category " + 
             "WHERE Timeslot_date BETWEEN ? AND ? AND Timeslot.Exam_center_idExam_center=? " +
             "GROUP BY timeslot.idTimeslot",
-            [idcancel,iDay + ' 00:00:00', fDay + ' 23:59:59', idExam_center], (error,results,fields) => {
+            [idcancel,iDay, fDay, idExam_center], (error,results,fields) => {
         error ? cb(error) : cb(false,results);
     });
 };
 
 var Qget_TimeslotInDateTime = (Exam_date,Begin_time,End_time, idExam_center, Exam_group, cb) => {
-    return myQuery("SELECT Timeslot.*, Duration, Num_students " + 
+    return myQuery("SELECT Timeslot.*,Exam_type.Exam_type_name,Type_category.Category, Exam_type.Duration, Exam_type.Num_students " + 
             "FROM Timeslot LEFT JOIN Exam_type ON Timeslot.Exam_type_idExam_type=Exam_type.idExam_type " +
+            "LEFT JOIN Type_category ON Exam_type.Type_category_idType_category=Type_category.idType_category " + 
             "WHERE Timeslot.Timeslot_date = ? AND ? >= Timeslot.Begin_time AND ? <= Timeslot.End_time AND Exam_center_idExam_center=? " +
             "AND Exam_group=? AND Timeslot.Exam_type_idExam_type IS NOT NULL",
             [Exam_date, Begin_time,End_time, idExam_center, Exam_group],(error,results,fields) => {
@@ -53,10 +55,11 @@ var Qget_byIdTimeslot = (idtimeslot,cb)=>{
 
 
 var Qget_timeslotById = (idcancel,id, idExam_center, cb) => {
-    return myQuery("SELECT Timeslot.*, Num_Students as Max_Num_Students, " +
+    return myQuery("SELECT Timeslot.*,Exam_type.Exam_type_name,Type_category.Category, Num_Students as Max_Num_Students, " +
                 "count(if(reservation.T_exam_status_idexam_status !=?,1,null)) as number_Reservations " +
                 "FROM Timeslot LEFT JOIN reservation ON timeslot.idTimeslot=reservation.Timeslot_idTimeslot " +
                 "LEFT JOIN Exam_type ON Timeslot.Exam_type_idExam_type=idExam_type " +
+                "LEFT JOIN Type_category ON Exam_type.Type_category_idType_category=Type_category.idType_category " +
                 "WHERE Timeslot.idTimeslot = ? AND Timeslot.Exam_center_idExam_center = ? " +
                 "GROUP BY Timeslot.idTimeslot",[idcancel,id, idExam_center], (error,results,fields) => {
         error ? cb(error) : cb(false,results);
