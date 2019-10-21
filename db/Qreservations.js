@@ -104,6 +104,18 @@ var Qget_PaidPendingReservations=(idExam_center,cb)=>{
     });
 };
 
+// get the reservations that are paid and in pending status for given exam center
+var Qget_byIdPaidPendingReservations=(idExam_center,idreservation,cb)=>{
+    return myQuery("SELECT reservation.*,Temp_Student.* FROM reservation " +
+                "INNER JOIN Timeslot ON Timeslot.idTimeslot=reservation.Timeslot_idTimeslot " +
+                "LEFT JOIN Temp_Student ON Temp_Student.Reservation_idReservation = reservation.idReservation " +
+                "LEFT JOIN Pendent_payments ON reservation.idReservation = Pendent_payments.Reservation_idReservation " +
+                "WHERE Exam_center_idExam_center=? AND reservation.idreservation=? AND reservation.T_exam_status_idexam_status=3 AND Pendent_payments.Payments_idPayments IS NOT NULL",
+                [idExam_center,idreservation], (error,results,fields) => {
+        error ? cb(error) : cb(false,results);
+    });
+};
+
 // Get reservations by student name on reservation temp student
 var Qget_byStudentNameReservations = (name,idExam_center,cb)=>{
         return myQuery("SELECT reservation.*,Temp_Student.* FROM reservation " +
@@ -240,6 +252,7 @@ module.exports = (myQuery) => {
         Qget_byStatusReservations,
         Qget_byPermitReservations,
         Qget_PaidPendingReservations,
+        Qget_byIdPaidPendingReservations,
         Qget_byDateReservations,
         Qget_byStudentNameReservations,
         Qget_byIDnumReservations,

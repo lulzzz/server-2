@@ -2,57 +2,43 @@ var dbHandlers = require("../db");
 
 var testfunc=(req,res,next)=>{
 
-	// a=1;
-	// b=null;
-	// c=3;
-
-	// let testvar;
-	// testvar=(a,b,c);
-	// if(testvar){
-	// 	console.log("Passei")
-	// }else{
-	// 	console.log("naopassei")
-	// };
-
-
-
 	var T_resource_idT_resource;
 	var T_permission_idT_permission;
 	let resource_size = req.body.length;
 	var record=[];
 
-	console.log("OBS " +req.body.obs);
-				if(req.body.role && req.body.obs){
-					console.log("NAO Existe os dois params " );
-				}else{
-					console.log("EXISTE os dois params " );
-				}
+	// console.log("OBS " +req.body.obs);
+	// 			if(req.body.role && req.body.obs){
+	// 				console.log("NAO Existe os dois params " );
+	// 			}else{
+	// 				console.log("EXISTE os dois params " );
+	// 			};
 
-	console.log("Received TEST");
-	console.log(req.body);
-	console.log("--------------------------------");
-	console.log("list_functions parse");
-	console.log(req.body.list_functions);
-	console.log("--------------------------------");
-	console.log("list_functions parse length");
-	console.log(req.body.list_functions.length);
-	console.log("--------------------------------");
-	console.log("list_functions[0].permissions parse");
-	console.log(req.body.list_functions[0].permissions);
-	console.log("--------------------------------");
-	console.log("list_functions[0].permissions length");
-	console.log(req.body.list_functions[0].permissions.length);
-	console.log("--------------------------------");
-	console.log("list_functions[0].permissions[0] ID");
-	console.log(req.body.list_functions[0].permissions[0].id);
-	console.log("--------------------------------");
-	console.log("list_functions[0].permissions[0] ID");
-	console.log(req.body.list_functions[0].permissions[0].id);
-	console.log("--------------------------------");
-	console.log("list_functions[0].permissions[0].valor.value GET VALUE");
-	console.log(req.body.list_functions[0].permissions[0].valor.value);
-	console.log("--------------------------------");
-	console.log(req.body.list_functions[0].permissions[2].valor.value);
+	// console.log("Received TEST");
+	// console.log(req.body);
+	// console.log("--------------------------------");
+	// console.log("list_functions parse");
+	// console.log(req.body.list_functions);
+	// console.log("--------------------------------");
+	// console.log("list_functions parse length");
+	// console.log(req.body.list_functions.length);
+	// console.log("--------------------------------");
+	// console.log("list_functions[0].permissions parse");
+	// console.log(req.body.list_functions[0].permissions);
+	// console.log("--------------------------------");
+	// console.log("list_functions[0].permissions length");
+	// console.log(req.body.list_functions[0].permissions.length);
+	// console.log("--------------------------------");
+	// console.log("list_functions[0].permissions[0] ID");
+	// console.log(req.body.list_functions[0].permissions[0].id);
+	// console.log("--------------------------------");
+	// console.log("list_functions[0].permissions[0] ID");
+	// console.log(req.body.list_functions[0].permissions[0].id);
+	// console.log("--------------------------------");
+	// console.log("list_functions[0].permissions[0].valor.value GET VALUE");
+	// console.log(req.body.list_functions[0].permissions[0].valor.value);
+	// console.log("--------------------------------");
+	// console.log(req.body.list_functions[0].permissions[2].valor.value);
 	for (let index = 0; index < resource_size; index++) {
 		// record.push([body[index].T_resource_idT_resource,body[index].T_permission_idT_permission,id_role]);
 		let permit_size = req.body[index].permissions.length;

@@ -97,16 +97,30 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 				};
 			});
 		}else if(req.query.paid){
-			dbHandlers.Qgen_reservations.Qget_PaidPendingReservations(req.params.idExam_center,(err,reservations)=>{
-				if(err){
-					console.log(err);
-					return res.status(500).json({message: 'Database error fetching pendent paid reservations'});	
-				}else if(reservations.length === 0) {
-					return res.status(204).json({message: 'No reservations found.'});
-				}else{
-					return res.status(200).json(reservations);
-				};
-			});
+			if (req.query.idReservation){
+				dbHandlers.Qgen_reservations.Qget_byIdPaidPendingReservations(req.params.idExam_center,(err,reservations)=>{
+					if(err){
+						console.log(err);
+						return res.status(500).json({message: 'Database error fetching pendent paid reservations'});	
+					}else if(reservations.length === 0) {
+						return res.status(204).json({message:"Invalid reseration"});
+					}else{
+						// TODO change reservation status to marcado
+						return res.status(200).json({message:"Reservation validated"});
+					};
+				});
+			}else{
+				dbHandlers.Qgen_reservations.Qget_PaidPendingReservations(req.params.idExam_center,(err,reservations)=>{
+					if(err){
+						console.log(err);
+						return res.status(500).json({message: 'Database error fetching pendent paid reservations'});	
+					}else if(reservations.length === 0) {
+						return res.status(204).json({message: 'No reservations found.'});
+					}else{
+						return res.status(200).json(reservations);
+					};
+				});
+			};
 		}else if (req.query.idReservation){
 			dbHandlers.Qgen_reservations.Qget_byIdReservation(req.query.idReservation,(err,reservations)=>{
 				if(err){
@@ -214,7 +228,7 @@ var postList_Reservations=async(req,res)=>{
 										dbHandlers.Qgen_reservations.Qpost_reservations([ 
 											req.body.idTimeslot,
 											req.user.user,
-											new Date(new Date().getTime() + 3600000), 
+											new Date(new Date().getTime() + (config.reservation.block_timer*60000)), 
 											timeslot[0].Exam_type_idExam_type,
 											idpending[0].idexam_status
 										], (error,blocked) => { // Add reservations
@@ -230,7 +244,7 @@ var postList_Reservations=async(req,res)=>{
 										dbHandlers.Qgen_reservations.Qpost_pairReservations([ // Adds reservation
 											req.body.idTimeslot,
 											req.user.user,
-											new Date(new Date().getTime() + 3600000),
+											new Date(new Date().getTime() + (config.reservation.block_timer*60000)),
 											timeslot[0].Exam_type_idExam_type,
 											idpending[0].idexam_status
 										], (error,blocked) => { // Add reservations
@@ -586,104 +600,114 @@ var patchList_Reservations=async(req,res,next)=>{
 	}else if(req.query.check){
 		// validates reservation and creates booking
 		if (req.body.idReservation){
-			// Promise to get account id
-			var P_account=new Promise((resolve,reject)=>{
-				dbHandlers.Qgen_accounts.Qget_byUserAccount(req.user.user,(e,account)=>{
-					if(e){
-						console.log(e);
-						return res.status(500).json({message:"Error getting account"});
-						reject();
-					}else{
-						resolve(account.idAccount);	
-					};	
-				});
-			});
-			var temp_account = await P_account.then();
-			// get reservation by id
-			dbHandlers.Qgen_reservations.Qget_byIdReservation(req.body.idReservation,(err,reservation)=>{
-				console.log("reservation "+ JSON.stringify(reservation))
+			dbHandlers.Qgen_reservations.Qget_byIdPaidPendingReservations(req.params.idExam_center,
+						req.body.idReservation,(err,reservations)=>{
 				if(err){
 					console.log(err);
-					return res.status(500).json({message:'Error getting reservation'});	
+					return res.status(500).json({message: 'Database error fetching pendent paid reservations'});	
+				}else if(reservations.length === 0) {
+					return res.status(204).json({message:"Invalid reseration"});
 				}else{
-					// get the school
-					dbHandlers.Qgen_school.Qget_byPermitSchool_Exam_Center(reservation[0].School_Permit,reservation[0].Exam_center_idExam_center,
-								(err,school)=>{
-						console.log("school "+ JSON.stringify(school));
-						if (err){
+					// Promise to get account id
+					var P_account=new Promise((resolve,reject)=>{
+						dbHandlers.Qgen_accounts.Qget_byUserAccount(req.user.user,(e,account)=>{
+							if(e){
+								console.log(e);
+								return res.status(500).json({message:"Error getting account"});
+								reject();
+							}else{
+								resolve(account.idAccount);	
+							};	
+						});
+					});
+					var temp_account = await P_account.then();
+					// get reservation by id
+					dbHandlers.Qgen_reservations.Qget_byIdReservation(req.body.idReservation,(err,reservation)=>{
+						console.log("reservation "+ JSON.stringify(reservation))
+						if(err){
 							console.log(err);
-							return res.status(500).json({message: 'Error getting school'});	
+							return res.status(500).json({message:'Error getting reservation'});	
 						}else{
-							// creates the student
-							dbHandlers.Qgen_student.Qcreate_Student(reservation[0].T_ID_type_idT_ID_type,
-									[reservation[0].Student_name,reservation[0].Student_num,
-									reservation[0].Birth_date,reservation[0].ID_num,
-									reservation[0].ID_expire_date,reservation[0].Tax_num,
-									reservation[0].Drive_license_num,reservation[0].Obs],
-									(err,results)=>{
-								console.log("student")
-								if(err){
+							// get the school
+							dbHandlers.Qgen_school.Qget_byPermitSchool_Exam_Center(reservation[0].School_Permit,reservation[0].Exam_center_idExam_center,
+										(err,school)=>{
+								console.log("school "+ JSON.stringify(school));
+								if (err){
 									console.log(err);
-									return res.status(500).json({message: 'Error creating student'});	
+									return res.status(500).json({message: 'Error getting school'});	
 								}else{
-									let tempId=results.insertId;
-									dbHandlers.Qgen_student_license.Qcreate_Student_license(
-											[reservation[0].Student_license,
-											reservation[0].Expiration_date,1],
-											tempId,school[0].idSchool,
-											reservation[0].idType_category,(err,results)=>{
-										console.log("license created");
-										if (err){
+									// creates the student
+									dbHandlers.Qgen_student.Qcreate_Student(reservation[0].T_ID_type_idT_ID_type,
+											[reservation[0].Student_name,reservation[0].Student_num,
+											reservation[0].Birth_date,reservation[0].ID_num,
+											reservation[0].ID_expire_date,reservation[0].Tax_num,
+											reservation[0].Drive_license_num,reservation[0].Obs],
+											(err,results)=>{
+										// console.log("student")
+										if(err){
 											console.log(err);
-											dbHandlers.Qgen_student.Qdelete_byIdStudent(tempId,(err,results)=>{
-												return res.status(500).json({message:"Error creating student license"});
-											});		
+											return res.status(500).json({message: 'Error creating student'});	
 										}else{
-											var tempstudent_license=results.insertId;
-											dbHandlers.Qgen_exam_status.Qget_byProcessBookedID(1,(e,id_status)=>{
-												if(e){
-													console.log(e);
-													return res.status(500).json({message:"Error fetching id exam status"});		
+											let tempId=results.insertId;
+											dbHandlers.Qgen_student_license.Qcreate_Student_license(
+													[reservation[0].Student_license,
+													reservation[0].Expiration_date,1],
+													tempId,school[0].idSchool,
+													reservation[0].idType_category,(err,results)=>{
+												// console.log("license created");
+												if (err){
+													console.log(err);
+													dbHandlers.Qgen_student.Qdelete_byIdStudent(tempId,(err,results)=>{
+														return res.status(500).json({message:"Error creating student license"});
+													});		
 												}else{
-													dbHandlers.Qgen_sicc_status.Qget_byProcess_Operation_Sicc_status(1,1,(e,id_sicc)=>{
+													var tempstudent_license=results.insertId;
+													dbHandlers.Qgen_exam_status.Qget_byProcessBookedID(1,(e,id_status)=>{
 														if(e){
 															console.log(e);
-															return res.status(500).json({message:"Error fetching id exam status"});
+															return res.status(500).json({message:"Error fetching id exam status"});		
 														}else{
-															// creates booking
-															dbHandlers.Qgen_booked.Qcreate_byReservationBooking([new Date(),reservation[0].Obs,
-																		tempstudent_license,reservation[0].idTimeslot,temp_account,
-																		req.params.idExam_center,reservation[0].Exam_type_idExam_type,
-																		id_status[0].idexam_status,id_sicc[0].idsicc_status,
-																		req.body.idReservation],(err,results)=>{
-																if (err){
-																	console.log(err);
-																	return res.status(500).send({message:"Error creating booking"});
+															dbHandlers.Qgen_sicc_status.Qget_byProcess_Operation_Sicc_status(1,1,(e,id_sicc)=>{
+																if(e){
+																	console.log(e);
+																	return res.status(500).json({message:"Error fetching id exam status"});
 																}else{
-																	dbHandlers.Qgen_exam_status.Qget_byProcessAprovedID(0,(e,id_status)=>{
-																		if (e){
-																			console.log(e);	
+																	// creates booking
+																	dbHandlers.Qgen_booked.Qcreate_byReservationBooking([new Date(),reservation[0].Obs,
+																				tempstudent_license,reservation[0].idTimeslot,temp_account,
+																				req.params.idExam_center,reservation[0].Exam_type_idExam_type,
+																				id_status[0].idexam_status,id_sicc[0].idsicc_status,
+																				req.body.idReservation],(err,results)=>{
+																		if (err){
+																			console.log(err);
+																			return res.status(500).send({message:"Error creating booking"});
 																		}else{
-																			// Change the status of given reservation to APROVED
-																			dbHandlers.Qgen_reservations.Qpatch_Pendentreservation(id_status[0].idexam_status,
-																						req.body.idReservation,(e)=>{
+																			dbHandlers.Qgen_exam_status.Qget_byProcessAprovedID(0,(e,id_status)=>{
 																				if (e){
-																					console.log(e);
-																					return res.status(500).send({message:"Error creating booking"});
+																					console.log(e);	
 																				}else{
-																					return res.status(200).send({message:"Booking created"});
+																					// Change the status of given reservation to APROVED
+																					dbHandlers.Qgen_reservations.Qpatch_Pendentreservation(id_status[0].idexam_status,
+																								req.body.idReservation,(e)=>{
+																						if (e){
+																							console.log(e);
+																							return res.status(500).send({message:"Error creating booking"});
+																						}else{
+																							return res.status(200).send({message:"Booking created"});
+																						};
+																					});
 																				};
 																			});
 																		};
 																	});
 																};
-															});
+															});	
 														};
-													});	
+													});
 												};
-											});
+											});		
 										};
-									});		
+									});
 								};
 							});
 						};
