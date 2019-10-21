@@ -228,7 +228,7 @@ var postList_Reservations=async(req,res)=>{
 										dbHandlers.Qgen_reservations.Qpost_reservations([ 
 											req.body.idTimeslot,
 											req.user.user,
-											new Date(new Date().getTime() + (config.reservation.block_timer*60000)), 
+											new Date(new Date().getTime() + (10*60000)), 
 											timeslot[0].Exam_type_idExam_type,
 											idpending[0].idexam_status
 										], (error,blocked) => { // Add reservations
@@ -244,7 +244,7 @@ var postList_Reservations=async(req,res)=>{
 										dbHandlers.Qgen_reservations.Qpost_pairReservations([ // Adds reservation
 											req.body.idTimeslot,
 											req.user.user,
-											new Date(new Date().getTime() + (config.reservation.block_timer*60000)),
+											new Date(new Date().getTime() + (10*60000)),
 											timeslot[0].Exam_type_idExam_type,
 											idpending[0].idexam_status
 										], (error,blocked) => { // Add reservations
@@ -601,7 +601,7 @@ var patchList_Reservations=async(req,res,next)=>{
 		// validates reservation and creates booking
 		if (req.body.idReservation){
 			dbHandlers.Qgen_reservations.Qget_byIdPaidPendingReservations(req.params.idExam_center,
-						req.body.idReservation,(err,reservations)=>{
+						req.body.idReservation,async (err,reservations)=>{
 				if(err){
 					console.log(err);
 					return res.status(500).json({message: 'Database error fetching pendent paid reservations'});	

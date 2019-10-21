@@ -271,3 +271,16 @@ module.exports = (myQuery) => {
         Qget_search
     };
 };
+
+
+
+
+
+
+
+
+
+            // "host"            : "eu-cdbr-west-02.cleardb.net",
+            // "user"            : "bd054856aacb55",
+            // "password"        : "2e207c21",
+            // "database"        : "heroku_25f209348418839"
