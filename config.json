@@ -42,5 +42,8 @@
 	},
 	"files":{
 		"reservations_model2":"./reservas"
+	},
+	"reservation":{
+		"block_time":10
 	}
 }

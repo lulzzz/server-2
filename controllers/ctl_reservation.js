@@ -206,8 +206,8 @@ var postList_Reservations=async(req,res)=>{
 					reject(error);
 				}else{
 					// Gets timeslot
-					dbHandlers.Qgen_timeslot.Qget_timeslotById(idcancel[0].idexam_status,req.body.idTimeslot, req.params.idExam_center,
-								async(error, timeslot)=>{
+					dbHandlers.Qgen_timeslot.Qget_timeslotById(idcancel[0].idexam_status,
+							req.body.idTimeslot, req.params.idExam_center,async(error, timeslot)=>{
 						if (error) {
 							console.log(error);
 							return res.status(500).json({message: 'There was an error while trying to get information about the timeslot.'});
@@ -228,7 +228,7 @@ var postList_Reservations=async(req,res)=>{
 										dbHandlers.Qgen_reservations.Qpost_reservations([ 
 											req.body.idTimeslot,
 											req.user.user,
-											new Date(new Date().getTime() + (10*60000)), 
+											new Date(new Date().getTime() + (config.reservation.block_time*60000)), 
 											timeslot[0].Exam_type_idExam_type,
 											idpending[0].idexam_status
 										], (error,blocked) => { // Add reservations
@@ -244,7 +244,7 @@ var postList_Reservations=async(req,res)=>{
 										dbHandlers.Qgen_reservations.Qpost_pairReservations([ // Adds reservation
 											req.body.idTimeslot,
 											req.user.user,
-											new Date(new Date().getTime() + (10*60000)),
+											new Date(new Date().getTime() + (config.reservation.block_time*60000)),
 											timeslot[0].Exam_type_idExam_type,
 											idpending[0].idexam_status
 										], (error,blocked) => { // Add reservations
@@ -532,7 +532,7 @@ var patchList_Reservations=async(req,res,next)=>{
 						if (req.query.idTemp_Student) { // Update the temporary student
 							dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
 										'T_ID_Type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'tax_num', 'Drive_license_num', 
-										'Obs', 'School_Permit', 'idType_category', 'Student_license', 'Student_license_Expiration_date']), 
+										'Obs', 'School_Permit', 'idType_category', 'Student_license', 'Student_license_Expiration_date','Student_num']), 
 										req.query.idTemp_Student, (error) => { // Modifies the student
 								if (error) {
 									console.log(error);
@@ -549,7 +549,7 @@ var patchList_Reservations=async(req,res,next)=>{
 			}else if (req.query.idTemp_Student) { // Update the temporary student
 				dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
 							'T_ID_Type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'tax_num', 'Drive_license_num', 
-							'Obs', 'School_Permit', 'idType_category', 'Student_license', 'Student_license_Expiration_date']), 
+							'Obs', 'School_Permit', 'idType_category', 'Student_license', 'Student_license_Expiration_date','Student_num']), 
 							req.query.idTemp_Student, (error) => { // Modifies the student
 					if (error) {
 						console.log(error);
@@ -606,7 +606,7 @@ var patchList_Reservations=async(req,res,next)=>{
 					console.log(err);
 					return res.status(500).json({message: 'Database error fetching pendent paid reservations'});	
 				}else if(reservations.length === 0) {
-					return res.status(204).json({message:"Invalid reseration"});
+					return res.status(204).json({message:"Reservation not paid"});
 				}else{
 					// Promise to get account id
 					var P_account=new Promise((resolve,reject)=>{
