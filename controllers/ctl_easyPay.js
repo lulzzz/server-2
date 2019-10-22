@@ -8,6 +8,7 @@ var moment=require('moment');
 var bulk = async () => {
     // console.log('here');
     dbHandlers.Qgen_reservations.Qget_reservationWithouthEasyPayId( async(error, result) => {
+        console.log("Reservas a serem emitidas "+result);
         if (error) {
             console.log(error);
             // return res.status(500).json({ message: "Error getting EasyPay ids." });

@@ -34,8 +34,8 @@
 		"easy_pay_account_id": "48e49b0e-1ba6-4b36-b584-08b00a994441",
 		"easy_pai_api_key": "c77502fd-9048-4812-af38-f253fa404206",
 		"easy_pay_header_code": "easypay-header-code",
-		"timer_hour":18,
-		"timer_min":42
+		"timer_hour":14,
+		"timer_min":30
 	},
 	"special_offers":{
 		"TM_exams":10
