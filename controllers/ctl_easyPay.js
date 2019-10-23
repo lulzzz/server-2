@@ -8,7 +8,9 @@ var moment=require('moment');
 var bulk = async () => {
     // console.log('here');
     dbHandlers.Qgen_reservations.Qget_reservationWithouthEasyPayId((error, result) => {
-        // console.log("Reservas a serem emitidas "+ result);
+        console.log("--------------------------------------------------------------------------------");
+        console.log("---------------------------------PROCESSO EASY PAY------------------------------");
+        console.log("--------------------------------------------------------------------------------");
         if (error) {
             console.log(error);
             // return res.status(500).json({ message: "Error getting EasyPay ids." });
@@ -27,7 +29,7 @@ var bulk = async () => {
                 .value()
             // console.log(withouthids);
             mapped.forEach(element => {
-                console.log(element);
+                // console.log(element);
 
                 var today= moment().format("YYYY-MM-DD");
                 var nextclock=moment().add(10,'m').format("YYYY-MM-DD HH:mm");
@@ -51,10 +53,10 @@ var bulk = async () => {
                     },
                     json: true
                 };
-
+                console.log("ENVIADO PARA O EASY PAY" + options);
                 //send request to easypay
                 request(options, function (error, response, body) {
-                    console.log(body)
+                    console.log("RECEBIDO DO EASY PAY REQUEST " + body);
                     if (error) {
                         console.log(err);
                         // return res.status(500).json({ message: "Error generating EasyPay reference" });
