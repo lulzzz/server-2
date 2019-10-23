@@ -299,8 +299,8 @@ var postList_Reservations=async(req,res)=>{
 					dbHandlers.Qgen_temp_student.Qpost_temp_Student([req.body.Student_name,req.body.Student_num,req.body.Birth_date,req.body.ID_num,
 								req.body.ID_expire_date, req.body.tax_num, req.body.Drive_license_num, req.body.Obs,
 								req.body.School_Permit,req.body.Student_license,req.body.Expiration_date,req.body.exam_expiration_date,
-								reservations[0].idReservation,req.body.Type_category_idType_category,req.body.T_ID_type_idT_ID_type,
-								req.body.exam_expiration_date], (error)=>{ // Adds a temporary student
+								reservations[0].idReservation,req.body.Type_category_idType_category,req.body.T_ID_type_idT_ID_type],
+								(error)=>{ // Adds a temporary student
 						if (error) {
 							console.log(error);
 							return res.status(500).json({message: 'There was an error while trying to update the student.'});
