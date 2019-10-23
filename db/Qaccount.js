@@ -40,7 +40,7 @@ var Qget_AllAcounts = (cb)=>{
 // create record for student 
 var Qcreate_Account = (values,cb)=>{
 	return myQuery ('INSERT INTO Account (User,Hash,Salt,User_name,User_email,In_session,Createdate,Updatedate,'+
-							'Status,Exam_center_idExam_center,Exam_center_name,Role_idRole) values (?)',
+							'Status,Exam_center_idExam_center,Exam_center_name,Role_idRole,School_idSchool) values (?)',
 							[values],(error, results, fields)=>{
 		error ? cb(error) : cb(false,results);			
 	});

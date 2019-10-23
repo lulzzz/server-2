@@ -6,6 +6,7 @@ const cors=require('cors');
 var schedule = require('node-schedule');
 // -------------------------------------
 var controllers = require("./controllers");
+var dbHandlers = require("./db");
 var passport=require('passport');
 require("./controllers").passport;
 // var passport = require("./controllers").passport;
@@ -15,17 +16,6 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 var config = require('./config.json');
 var port = process.env.PORT || config.backend.port;
-
-var rule = new schedule.RecurrenceRule();
-// rule.dayOfWeek = [0, 6];
-rule.hour = config.easy_pay.timer_hour;
-rule.minute = config.easy_pay.timer_min;
-rule.dayOfWeek = [0, new schedule.Range(0, 6)];
-
-var j = schedule.scheduleJob(rule, () => {
-  console.log('EasyPay pending reservations');
-  controllers.easyPay.bulk();
-});
 
 var app = express();
 var server = http.createServer(app);
@@ -41,6 +31,7 @@ app.use(passport.session());
 
 // requires the use of authorizathion for every route made
 // app.use(controllers.authorization);
+
 // Accounts routes
 app.use(require("./controllers/middleware/authentication"));
 app.post('/api/login',controllers.authorization.login);
@@ -230,7 +221,29 @@ app.get('/api/operadores',controllers.authorization.get_Accounts);
 // Route External API location
 app.get('/api/localizacao',controllers.location.getlocation);
 
+// --------------Schedule job-----------------------
+var rule = new schedule.RecurrenceRule();
+// rule.dayOfWeek = [0, 6];
+rule.hour = config.easy_pay.timer_hour;
+rule.minute = config.easy_pay.timer_min;
+rule.dayOfWeek = [0, new schedule.Range(0, 6)];
 
+var j = schedule.scheduleJob(rule, () => {
+	console.log('EasyPay pending reservations');
+	dbHandlers.Qgen_exam_center.Qget_Exam_center_ID((e,exam_center)=>{
+		if (e){
+			console.log(e);
+		}else if (exam_center.length<=0){
+			console.log("No exam centers configured");
+		}else{
+			exam_center.forEach(element => {
+				console.log(element)
+				controllers.easyPay.bulk(element.idExam_center);
+			});
+		};
+	});
+});
+// --------------------------------------------
 
 server.listen(port, () => {
   console.log(`Started on port ${port}`);

@@ -49,9 +49,15 @@ var Qget_imttCredencials=(idexam_center,cb)=>{
 
 var Qget_smtpCredencials = (idexam_center, cb) => {
 	return myQuery('SELECT exam_center.SMTP_server,exam_center.SMTP_user, exam_center.SMTP_pass FROM exam_center WHERE exam_center.idExam_center = ?',
-		[idexam_center], (error, results, fields) => {
+				[idexam_center], (error, results, fields) => {
 			error ? cb(error) : cb(false, results);
-		});
+	});
+};
+
+var Qget_Exam_center_ID =(cb)=>{
+	return myQuery('SELECT exam_center.idExam_center FROM exam_center',[null], (error, results, fields) => {
+		error ? cb(error) : cb(false, results);
+	});
 };
 
 // put record in exam_center
@@ -86,6 +92,7 @@ module.exports = function(myQuery){
 		Qget_IdbyNameExam_center,
 		Qget_imttCredencials,
 		Qget_smtpCredencials,
+		Qget_Exam_center_ID,
 		Qcreate_Exam_center,
 		Qdelete_byIdExam_center,
 		Qupdate_byIdExam_center

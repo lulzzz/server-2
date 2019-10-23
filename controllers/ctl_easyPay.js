@@ -5,7 +5,7 @@ var _ = require('lodash');
 var nodemailer = require('nodemailer');
 var moment=require('moment');
 
-var bulk = async () => {
+var bulk = async (id_exam_center) => {
     // console.log('here');
     dbHandlers.Qgen_reservations.Qget_reservationWithouthEasyPayId((error, result) => {
         console.log("--------------------------------------------------------------------------------");
@@ -25,7 +25,8 @@ var bulk = async () => {
                     School_permit: id,
                     value: _.sumBy(items, 'Exam_price'),
                     idReservation: _.map(items, 'idReservation'),
-                    Exam_center_idExam_center:_.map(items,'Exam_center_idExam_center')
+                    Exam_center_idExam_center:id_exam_center
+                    // Exam_center_idExam_center:_.map(items,'Exam_center_idExam_center')
                 }))
                 .value()
             console.log("-----------------------------------------------------------------COMPILAção"+ JSON.stringify(mapped));
@@ -75,10 +76,9 @@ var bulk = async () => {
                                 console.log(error);
                                 // return res.status(500).json({ message: 'There was an error while trying to update the reservation (idEasyPay).' });
                             } else {
-                                // console.log('done');
                                 // TODO ainda é para enviar através do examcenter?
-                                console.log("element.Exam_center_idExam_center" + element.Exam_center_idExam_center)
-                                dbHandlers.Qgen_exam_center.Qget_smtpCredencials(element.Exam_center_idExam_center, (err, smtpResults) => {
+                                // console.log("element.Exam_center_idExam_center" + element.Exam_center_idExam_center)
+                                dbHandlers.Qgen_exam_center.Qget_smtpCredencials(id_exam_center, (err, smtpResults) => {
                                     if (err || smtpResults <= 0) {
                                         console.log(err);
                                         // return res.status(500).json({ message: "Error creating pendent payment" });
@@ -98,13 +98,13 @@ var bulk = async () => {
                                         });
 
                                         // get receiver info from school.permit
-                                        dbHandlers.Qgen_school.Qget_byPermitSchool_Exam_Center(element.School_permit, element.Exam_center_idExam_center,
+                                        dbHandlers.Qgen_school.Qget_byPermitSchool_Exam_Center(element.School_permit, id_exam_center,
                                                 async (err, school_info) => {
                                             if (err || school_info <= 0) {
                                                 console.log(err);
                                                 // return res.status(500).json({ message: "Error getting school email" });
                                             }
-                                            var toEmail = school_info[0].Email1 || school_info[0].Email2
+                                            // var toEmail = school_info[0].Email1 || school_info[0].Email2
 
                                             var text = '\nEntidade: ' + entity +
                                                 '\nReferência: ' + reference +

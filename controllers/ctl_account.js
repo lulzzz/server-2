@@ -61,7 +61,7 @@ module.exports = {
 					dbHandlers.Qgen_accounts.Qcreate_Account([req.body.user,hash,salt,
 									user_name,user_email,1,createdate,null,1,
 									req.body.Exam_center_idExam_center,exam_center[0].Exam_center_name,
-									req.body.role.idRole],(e,r)=>{
+									req.body.role.idRole,req.body.School_idSchool],(e,r)=>{
 						if(e){
 							if(e.code == "ER_DUP_ENTRY"){
 								res.status(400).json({message:"User already exists"});
