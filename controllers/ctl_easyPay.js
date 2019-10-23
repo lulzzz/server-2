@@ -28,10 +28,10 @@ var bulk = async () => {
                     Exam_center_idExam_center:_.map(items,'Exam_center_idExam_center')
                 }))
                 .value()
-            console.log("-----------------------------------------------------------------COMPILAção"+ mapped);
+            console.log("-----------------------------------------------------------------COMPILAção"+ JSON.stringify(mapped));
             // console.log(withouthids);
             mapped.forEach(element => {
-                console.log("MENSAGEM PARA O EASY PAY" + element);
+                console.log("MENSAGEM PARA O EASY PAY" + JSON.stringify(element));
 
                 var today= moment().format("YYYY-MM-DD");
                 var nextclock=moment().add(10,'m').format("YYYY-MM-DD HH:mm");
