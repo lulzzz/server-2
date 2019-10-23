@@ -8,7 +8,7 @@ var moment=require('moment');
 var bulk = async () => {
     // console.log('here');
     dbHandlers.Qgen_reservations.Qget_reservationWithouthEasyPayId((error, result) => {
-        console.log("Reservas a serem emitidas "+ result);
+        // console.log("Reservas a serem emitidas "+ result);
         if (error) {
             console.log(error);
             // return res.status(500).json({ message: "Error getting EasyPay ids." });
@@ -25,7 +25,7 @@ var bulk = async () => {
                     Exam_center_idExam_center:_.map(items,'Exam_center_idExam_center')
                 }))
                 .value()
-            console.log(withouthids);
+            // console.log(withouthids);
             mapped.forEach(element => {
                 console.log(element);
 

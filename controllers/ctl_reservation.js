@@ -298,7 +298,7 @@ var postList_Reservations=async(req,res)=>{
 
 					dbHandlers.Qgen_temp_student.Qpost_temp_Student([req.body.Student_name,req.body.Student_num,req.body.Birth_date,req.body.ID_num,
 								req.body.ID_expire_date, req.body.tax_num, req.body.Drive_license_num, req.body.Obs,
-								req.body.School_Permit,req.body.Student_license,req.body.Expiration_date,
+								req.body.School_Permit,req.body.Student_license,req.body.Expiration_date,req.body.exam_expiration_date,
 								reservations[0].idReservation,req.body.Type_category_idType_category,req.body.T_ID_type_idT_ID_type,
 								req.body.exam_expiration_date], (error)=>{ // Adds a temporary student
 						if (error) {
@@ -306,21 +306,20 @@ var postList_Reservations=async(req,res)=>{
 							return res.status(500).json({message: 'There was an error while trying to update the student.'});
 						}else{
 							dbHandlers.Qgen_exam_price.Qget_price_associated(reservations[0].Exam_type_idExam_type,(err, price) => {
-									if (err || price.length <= 0) {
-										return res.status(500).json({ message: "Error getting exam price" });
-									} else {
-										dbHandlers.Qgen_pendent_payments.Qcreate_PendentPayment_reservation(price[0].Value, reservations[0].idReservation, 
-														(err, results) => {
-											if (err) {
-												console.log(err);
-												return res.status(500).json({ message: "Error creating pendent payment" });
-											} else {
-												return res.status(200).json({message:'Reservation added.'});
-												
-											};
-										});
-									};
-								});
+								if (err || price.length <= 0) {
+									return res.status(500).json({ message: "Error getting exam price" });
+								} else {
+									dbHandlers.Qgen_pendent_payments.Qcreate_PendentPayment_reservation(price[0].Value, reservations[0].idReservation, 
+													(err, results) => {
+										if (err) {
+											console.log(err);
+											return res.status(500).json({ message: "Error creating pendent payment" });
+										} else {
+											return res.status(200).json({message:'Reservation added.'});
+										};
+									});
+								};
+							});
 						};
 					});
 				});
