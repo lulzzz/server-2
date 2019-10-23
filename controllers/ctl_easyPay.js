@@ -11,6 +11,7 @@ var bulk = async () => {
         console.log("--------------------------------------------------------------------------------");
         console.log("---------------------------------PROCESSO EASY PAY------------------------------");
         console.log("--------------------------------------------------------------------------------");
+        console.log(" -----------------------------NUMERO DE VOLTAS  "+ result.length);
         if (error) {
             console.log(error);
             // return res.status(500).json({ message: "Error getting EasyPay ids." });
@@ -27,9 +28,10 @@ var bulk = async () => {
                     Exam_center_idExam_center:_.map(items,'Exam_center_idExam_center')
                 }))
                 .value()
+            console.log("-----------------------------------------------------------------COMPILAção"+ mapped);
             // console.log(withouthids);
             mapped.forEach(element => {
-                // console.log(element);
+                console.log("MENSAGEM PARA O EASY PAY" + element);
 
                 var today= moment().format("YYYY-MM-DD");
                 var nextclock=moment().add(10,'m').format("YYYY-MM-DD HH:mm");
@@ -75,6 +77,7 @@ var bulk = async () => {
                             } else {
                                 // console.log('done');
                                 // TODO ainda é para enviar através do examcenter?
+                                console.log("element.Exam_center_idExam_center" + element.Exam_center_idExam_center)
                                 dbHandlers.Qgen_exam_center.Qget_smtpCredencials(element.Exam_center_idExam_center, (err, smtpResults) => {
                                     if (err || smtpResults <= 0) {
                                         console.log(err);

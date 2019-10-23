@@ -48,7 +48,7 @@ var Qget_imttCredencials=(idexam_center,cb)=>{
 };
 
 var Qget_smtpCredencials = (idexam_center, cb) => {
-	return myQuery('SELECT exam_center.SMTP_server,exam_center.SMTP_user, exam_center.SMTP_pass FROM exam_center WHERE exam_center.idExam_center = ? LIMIT 1',
+	return myQuery('SELECT exam_center.SMTP_server,exam_center.SMTP_user, exam_center.SMTP_pass FROM exam_center WHERE exam_center.idExam_center = ?',
 		[idexam_center], (error, results, fields) => {
 			error ? cb(error) : cb(false, results);
 		});
