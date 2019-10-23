@@ -151,7 +151,6 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 
 var postList_Reservations=async(req,res)=>{
 	if(req.query.idReservation && req.query.file){
-
 		// var fs = require('fs');
 
 		// fs.stat(config.files.reservations_model2+'/2019', function(err) {
@@ -296,17 +295,17 @@ var postList_Reservations=async(req,res)=>{
 						console.log(error);
 						return res.status(500).json({message: 'There was an error while trying to update the reservation.'});
 					};
-					dbHandlers.Qgen_temp_student.Qpost_temp_Student([
-								req.body.Student_name, req.body.Birth_date, req.body.ID_num,
+
+					dbHandlers.Qgen_temp_student.Qpost_temp_Student([req.body.Student_name,req.body.Student_num,req.body.Birth_date,req.body.ID_num,
 								req.body.ID_expire_date, req.body.tax_num, req.body.Drive_license_num, req.body.Obs,
 								req.body.School_Permit,req.body.Student_license,req.body.Expiration_date,
-								reservations[0].idReservation,req.body.Type_category_idType_category,req.body.T_ID_type_idT_ID_type], (error)=>{ // Adds a temporary student
+								reservations[0].idReservation,req.body.Type_category_idType_category,req.body.T_ID_type_idT_ID_type,
+								req.body.exam_expiration_date], (error)=>{ // Adds a temporary student
 						if (error) {
 							console.log(error);
 							return res.status(500).json({message: 'There was an error while trying to update the student.'});
 						}else{
-							dbHandlers.Qgen_exam_price.Qget_price_associated(reservations[0].Exam_type_idExam_type,
-								(err, price) => {
+							dbHandlers.Qgen_exam_price.Qget_price_associated(reservations[0].Exam_type_idExam_type,(err, price) => {
 									if (err || price.length <= 0) {
 										return res.status(500).json({ message: "Error getting exam price" });
 									} else {
@@ -316,19 +315,20 @@ var postList_Reservations=async(req,res)=>{
 												console.log(err);
 												return res.status(500).json({ message: "Error creating pendent payment" });
 											} else {
-												var options = {
-													url: config.easy_pay.easy_pay_url,
-													method: 'POST',
-													headers: {
-														'AccountId': config.easy_pay.easy_pay_account_id,
-														'ApiKey': config.easy_pay.easy_pai_api_key
-													},
-													body: {
-														"value": price[0].Value,
-														"method": "mb"
-													},
-													json: true
-												};
+												return res.status(200).json({message:'Reservation added.'});
+												// var options = {
+												// 	url: config.easy_pay.easy_pay_url,
+												// 	method: 'POST',
+												// 	headers: {
+												// 		'AccountId': config.easy_pay.easy_pay_account_id,
+												// 		'ApiKey': config.easy_pay.easy_pai_api_key
+												// 	},
+												// 	body: {
+												// 		"value": price[0].Value,
+												// 		"method": "mb"
+												// 	},
+												// 	json: true
+												// };
 												// //send request to easypay
 												// request(options, function (error, response, body) {
 												// 	if (error) {
@@ -531,9 +531,9 @@ var patchList_Reservations=async(req,res,next)=>{
 					}else{
 						if (req.query.idTemp_Student) { // Update the temporary student
 							dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
-										'T_ID_Type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'tax_num', 'Drive_license_num', 
-										'Obs', 'School_Permit', 'idType_category', 'Student_license', 'Student_license_Expiration_date','Student_num']), 
-										req.query.idTemp_Student, (error) => { // Modifies the student
+										'T_ID_Type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'tax_num', 'Drive_license_num','Obs',
+										'School_Permit', 'idType_category', 'Student_license', 'Student_license_Expiration_date','Student_num',
+										'exam_expiration_date']),req.query.idTemp_Student, (error) => { // Modifies the student
 								if (error) {
 									console.log(error);
 									return res.status(500).json({message: 'Error trying to update the reservation student.'});
@@ -548,8 +548,8 @@ var patchList_Reservations=async(req,res,next)=>{
 				});
 			}else if (req.query.idTemp_Student) { // Update the temporary student
 				dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
-							'T_ID_Type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'tax_num', 'Drive_license_num', 
-							'Obs', 'School_Permit', 'idType_category', 'Student_license', 'Student_license_Expiration_date','Student_num']), 
+							'T_ID_Type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'tax_num', 'Drive_license_num','Obs','School_Permit', 
+							'idType_category', 'Student_license', 'Student_license_Expiration_date','Student_num','exam_expiration_date']), 
 							req.query.idTemp_Student, (error) => { // Modifies the student
 					if (error) {
 						console.log(error);

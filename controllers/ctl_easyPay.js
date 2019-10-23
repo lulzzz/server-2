@@ -7,8 +7,8 @@ var moment=require('moment');
 
 var bulk = async () => {
     // console.log('here');
-    dbHandlers.Qgen_reservations.Qget_reservationWithouthEasyPayId( async(error, result) => {
-        console.log("Reservas a serem emitidas "+result);
+    dbHandlers.Qgen_reservations.Qget_reservationWithouthEasyPayId((error, result) => {
+        console.log("Reservas a serem emitidas "+ result);
         if (error) {
             console.log(error);
             // return res.status(500).json({ message: "Error getting EasyPay ids." });
@@ -93,7 +93,8 @@ var bulk = async () => {
                                         });
 
                                         // get receiver info from school.permit
-                                        dbHandlers.Qgen_school.Qget_byPermitSchool_Exam_Center(element.School_permit, element.Exam_center_idExam_center, async (err, school_info) => {
+                                        dbHandlers.Qgen_school.Qget_byPermitSchool_Exam_Center(element.School_permit, element.Exam_center_idExam_center,
+                                                async (err, school_info) => {
                                             if (err || school_info <= 0) {
                                                 console.log(err);
                                                 // return res.status(500).json({ message: "Error getting school email" });

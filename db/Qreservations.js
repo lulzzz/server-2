@@ -161,7 +161,7 @@ var Qget_byIdEasyPay = (idEasyPay, cb) => {
 
 // get easyPay references that don't have a payment
 var Qget_reservationWithouthEasyPayId = (cb) => {
-    return myQuery('SELECT idReservation, Exam_price, School_permit, Timeslot.Exam_center_idExam_center FROM reservation ' + 
+    return myQuery('SELECT reservation.idReservation, Exam_price, School_permit, Timeslot.Exam_center_idExam_center FROM reservation ' + 
         'Inner join pendent_payments on pendent_payments.Reservation_idReservation = reservation.idReservation ' + 
         'inner join temp_student on temp_student.Reservation_idReservation = reservation.idReservation ' +
         'left join timeslot on reservation.Timeslot_idTimeslot = Timeslot.idTimeslot ' +
