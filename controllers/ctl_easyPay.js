@@ -53,10 +53,10 @@ var bulk = async () => {
                     },
                     json: true
                 };
-                console.log("ENVIADO PARA O EASY PAY" + options);
+                console.log("ENVIADO PARA O EASY PAY" + JSON.stringify(options));
                 //send request to easypay
                 request(options, function (error, response, body) {
-                    console.log("RECEBIDO DO EASY PAY REQUEST " + body);
+                    console.log("RECEBIDO DO EASY PAY REQUEST " + JSON.stringify(body));
                     if (error) {
                         console.log(err);
                         // return res.status(500).json({ message: "Error generating EasyPay reference" });
