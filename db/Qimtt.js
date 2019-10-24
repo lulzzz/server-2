@@ -74,7 +74,7 @@ const Qget_search_ETC = (query, values, cb) => {
         + ' student.ID_num AS docIdNumber,'
         + ' student_license.Student_license AS learningLicenseNumber,'
         + ' student.Tax_num as NIF    '
-        + ' FROM anieca.exam '
+        + ' FROM exam '
         + ' INNER JOIN booked'
         + ' ON exam.Booked_idBooked = booked.idBooked'
         + ' INNER JOIN exam_center ON booked.Exam_center_idExam_center = exam_center.idExam_center'
@@ -91,7 +91,7 @@ const Qget_search_ETC = (query, values, cb) => {
 };
 
 var Qget_byLicenseBooked=(idlicense,cb)=>{
-	return myQuery("SELECT idBooked FROM anieca.booked " +
+	return myQuery("SELECT idBooked FROM booked " +
                     "inner join student_license on booked.Student_license_idStudent_license = student_license.idStudent_license "+
                     "where student_license.Student_license = ?",[idlicense],(error, results,fields)=>{
 		error ? cb(error) : cb(false,results);	

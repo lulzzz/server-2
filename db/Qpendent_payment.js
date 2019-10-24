@@ -139,7 +139,7 @@ var Qget_byNotPaid_Tax=(idexam_center,cb)=>{
 
 // get easyPay references that don't have a payment
 var Qget_pendentPaymentsEasyPay = (cb) => {
-	return myQuery('SELECT idEasyPay FROM anieca.pendent_payments ' +
+	return myQuery('SELECT idEasyPay FROM pendent_payments ' +
 		'Inner join reservation on pendent_payments.Reservation_idReservation = reservation.idReservation ' +
 		'Where pendent_payments.Payments_idPayments is NULL ' +
 		'AND pendent_payments.Exam_price IS NOT NULL ' +
