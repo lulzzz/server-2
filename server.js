@@ -36,6 +36,7 @@ app.use(passport.session());
 app.use(require("./controllers/middleware/authentication"));
 app.post('/api/login',controllers.authorization.login);
 app.post('/api/registo',controllers.authorization.register);
+// TODO OPERATOR EDIT
 // ------------------------------------------------------------------------------
 // Resources/Permission routes
 app.get('/api/recursos',controllers.resources.getList_resources);

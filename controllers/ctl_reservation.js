@@ -264,17 +264,18 @@ var postList_Reservations=async(req,res)=>{
 				};
 			});
 		}else{ // Add reservations
-			if (!req.body.tax_num || !req.body.Exam_type_idExam_type) {
+			// if (!req.body.tax_num || !req.body.Exam_type_idExam_type) {
+			// 	return res.status(400).json({message:"Bad request"});
+			// };
+			// let sVal = new validator(req.body, Temp_Student_Schema)
+			// let matched = await sVal.check();
+			// if (!matched) {
+			// 	console.log(sVal.errors);
+			// 	
+			// };
+			if (!req.body.idTimeslot){
 				return res.status(400).json({message:"Bad request"});
-			};
-			let sVal = new validator(req.body, Temp_Student_Schema)
-			let matched = await sVal.check();
-
-			if (!matched) {
-				console.log(sVal.errors);
-				return res.status(400).json({message:"Fail schema"});
-			};
-
+			}
 			// Gets locked reservations
 			dbHandlers.Qgen_reservations.Qget_lockedReservationsByTimeslotAndUser(req.body.idTimeslot, 
 					req.params.idExam_center,req.user.user,(error, reservations) => { 
@@ -285,9 +286,8 @@ var postList_Reservations=async(req,res)=>{
 				if (reservations.length === 0) {
 					return res.status(400).json({message: 'There aren\'t blocked reservations to edit.'});
 				};
-
 				console.log("--------------------------------------------------- ");
-				console.log("RESERVATION DATA " + req.body);
+				console.log("RESERVATION DATA " + JSON.stringify(req.body));
 				console.log("--------------------------------------------------- ");
 				dbHandlers.Qgen_reservations.Qpatch_reservation({ // Edits the reservation (Turns it into a real reservation)
 					Exam_type_idExam_type: req.body.Exam_type_idExam_type,
@@ -298,7 +298,6 @@ var postList_Reservations=async(req,res)=>{
 						console.log(error);
 						return res.status(500).json({message: 'There was an error while trying to update the reservation.'});
 					};
-
 					dbHandlers.Qgen_temp_student.Qpost_temp_Student([req.body.Student_name,req.body.Student_num,req.body.Birth_date,req.body.ID_num,
 								req.body.ID_expire_date, req.body.tax_num, req.body.Drive_license_num, req.body.Obs,
 								req.body.School_Permit,req.body.Student_license,req.body.Expiration_date,req.body.exam_expiration_date,
@@ -416,6 +415,7 @@ var patchList_Reservations=async(req,res,next)=>{
 						return res.status(500).json({message:'Error updating the reservation.'});
 					}else{
 						if (req.query.idTemp_Student) { // Update the temporary student
+							console.log("--------PATCH RESERVA " + JSON.stringify(req.body));
 							dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
 										'T_ID_Type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'tax_num', 'Drive_license_num','Obs',
 										'School_Permit', 'idType_category', 'Student_license', 'Student_license_Expiration_date','Student_num',

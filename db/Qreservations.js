@@ -53,7 +53,8 @@ var Qget_reservationsDetailedByTimeslot = (idTimeslot, idExam_center, cb) => {
 var Qget_lockedReservationsByTimeslotAndUser = (idTimeslot, idExam_center, Account_User, cb) => {
     return myQuery("SELECT reservation.* FROM reservation " +
                 "INNER JOIN Timeslot ON Timeslot.idTimeslot=reservation.Timeslot_idTimeslot " +
-                "WHERE Exam_center_idExam_center=? AND Lock_expiration_date is NOT NULL AND idTimeslot=? AND Account_User=?",
+                "WHERE Timeslot.Exam_center_idExam_center=? AND reservation.Lock_expiration_date is NOT NULL " +
+                "AND Timeslot.idTimeslot=? AND reservation.Account_User=?",
                 [idExam_center, idTimeslot, Account_User], (error,results,fields) => {
         error ? cb(error) : cb(false,results);
     });
@@ -193,6 +194,7 @@ var Qpost_pairReservations = (object, cb) => {
 };
 
 var Qpatch_reservation = (object, id, cb) => {
+    console.log(JSON.stringify(object));
     return myQuery("UPDATE reservation SET ? WHERE idReservation=?", [object, id], (error,results,fields) => {
         error ? cb(error) : cb(false,results)
     });
