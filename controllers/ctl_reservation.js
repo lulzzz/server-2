@@ -286,6 +286,9 @@ var postList_Reservations=async(req,res)=>{
 					return res.status(400).json({message: 'There aren\'t blocked reservations to edit.'});
 				};
 
+				console.log("--------------------------------------------------- ");
+				console.log("RESERVATION DATA " + req.body);
+				console.log("--------------------------------------------------- ");
 				dbHandlers.Qgen_reservations.Qpatch_reservation({ // Edits the reservation (Turns it into a real reservation)
 					Exam_type_idExam_type: req.body.Exam_type_idExam_type,
 					Lock_expiration_date: null,
