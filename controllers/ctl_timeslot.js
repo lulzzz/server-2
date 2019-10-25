@@ -7,10 +7,23 @@ var _ = require('lodash')
 var getList_TimeslotByWeek = async (req, res) => {
 	// console.log("Getting timeslot");
 	// console.log(req.query)
-	if (req.query.week <= 53 && req.query.year) {
-		let beginningOfWeek = moment().isoWeek(req.query.week).year(req.query.year).startOf('week').local().format('YYYY-MM-DD');
+	// if (req.query.week <= 53 && req.query.year) {
+	if (req.query.begin && req.query.end && req.query.year) {
+		// console.log("-----------------WEEK " + req.query.week)
+		// let beginningOfWeek = moment().week(req.query.week).year(req.query.year).startOf('week').local().format('YYYY-MM-DD');
+		// console.log("----------------- BEGIN WEEK " + beginningOfWeek)
+		// // console.log("beginningOfWeek " + beginningOfWeek);
+		// let endOfWeek = moment().week(req.query.week).year(req.query.year).startOf('week').add(6, 'days').local().format('YYYY-MM-DD');
+		// console.log("----------------- END WEEK " + endOfWeek)
+		
+		let beginningOfWeek = req.query.begin
+
+		console.log("----------------- BEGIN WEEK " + beginningOfWeek)
 		// console.log("beginningOfWeek " + beginningOfWeek);
-		let endOfWeek = moment().isoWeek(req.query.week).year(req.query.year).startOf('week').add(6, 'days').local().format('YYYY-MM-DD');
+		
+		let endOfWeek = req.query.end
+		console.log("----------------- END WEEK " + endOfWeek)
+
 		// Gets Timeslots from a specific exam center on a specific week
 		let pTimeslot = new Promise((resolve, reject) => {
 			dbHandlers.Qgen_exam_status.Qget_byProcessCancelID(0,(error,idcancel)=>{
