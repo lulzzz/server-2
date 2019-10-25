@@ -29,7 +29,7 @@ var Qget_AllReservationsforSchedule=(idExam_center,cb)=>{
                 'LEFT JOIN Temp_Student ON Temp_Student.Reservation_idReservation = reservation.idReservation ' +
                 'LEFT JOIN T_ID_type ON T_ID_type.idT_ID_type = Temp_Student.T_ID_type_idT_ID_type ' +
                 'LEFT JOIN School ON School.Permit = Temp_Student.School_Permit ' + 
-                'WHERE AND Timeslot.Exam_center_idExam_center = ?',
+                'WHERE Timeslot.Exam_center_idExam_center = ?',
                 [idExam_center], (error,results,fields) => {
         error ? cb(error) : cb(false,results);
     });
