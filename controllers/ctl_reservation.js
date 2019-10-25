@@ -162,16 +162,6 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 
 var postList_Reservations=async(req,res)=>{
 	if(req.query.idReservation && req.query.file){
-		// var fs = require('fs');
-
-		// fs.stat(config.files.reservations_model2+'/2019', function(err) {
-		//     if (!err) {
-		//         console.log('file or directory exists');
-		//     }
-		//     else if (err.code === 'ENOENT') {
-		//         console.log('file or directory does not exist');
-		//     }
-		// });
 		// define multer storage 
 		var storage= multer.diskStorage({
 	       	destination: function (req, file, cb) {
@@ -297,9 +287,6 @@ var postList_Reservations=async(req,res)=>{
 				if (reservations.length === 0) {
 					return res.status(400).json({message: 'There aren\'t blocked reservations to edit.'});
 				};
-				console.log("--------------------------------------------------- ");
-				console.log("RESERVATION DATA " + JSON.stringify(req.body));
-				console.log("--------------------------------------------------- ");
 				dbHandlers.Qgen_reservations.Qpatch_reservation({ // Edits the reservation (Turns it into a real reservation)
 					Exam_type_idExam_type: req.body.Exam_type_idExam_type,
 					Lock_expiration_date: null,
@@ -426,7 +413,7 @@ var patchList_Reservations=async(req,res,next)=>{
 						return res.status(500).json({message:'Error updating the reservation.'});
 					}else{
 						if (req.query.idTemp_Student) { // Update the temporary student
-							console.log("--------PATCH RESERVA " + JSON.stringify(req.body));
+							// console.log("--------PATCH RESERVA " + JSON.stringify(req.body));
 							dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
 										'T_ID_Type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'tax_num', 'Drive_license_num','Obs',
 										'School_Permit', 'idType_category', 'Student_license', 'Student_license_Expiration_date','Student_num',
