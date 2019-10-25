@@ -7,10 +7,10 @@ var _ = require('lodash')
 var getList_TimeslotByWeek = async (req, res) => {
 	// console.log("Getting timeslot");
 	// console.log(req.query)
-	if (req.query.week <= 52 && req.query.year) {
-		let beginningOfWeek = moment().week(req.query.week).year(req.query.year).startOf('week').local().format('YYYY-MM-DD');
+	if (req.query.week <= 53 && req.query.year) {
+		let beginningOfWeek = moment().isoWeek(req.query.week).year(req.query.year).startOf('week').local().format('YYYY-MM-DD');
 		// console.log("beginningOfWeek " + beginningOfWeek);
-		let endOfWeek = moment().week(req.query.week).year(req.query.year).startOf('week').add(6, 'days').local().format('YYYY-MM-DD');
+		let endOfWeek = moment().isoWeek(req.query.week).year(req.query.year).startOf('week').add(6, 'days').local().format('YYYY-MM-DD');
 		// Gets Timeslots from a specific exam center on a specific week
 		let pTimeslot = new Promise((resolve, reject) => {
 			dbHandlers.Qgen_exam_status.Qget_byProcessCancelID(0,(error,idcancel)=>{

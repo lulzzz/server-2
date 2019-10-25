@@ -129,8 +129,7 @@ var P_associate_PendP= async (id,idpayment) => {
 var create_Payment = (req,res,next)=>{
 	if(!req.query.search){
 		if (req.body.Payment_date && req.body.Total_value){
-			dbHandlers.Qgen_payment.Qcreate_Payment([req.body.Payment_date,req.body.Total_value],
-							(err,results)=>{
+			dbHandlers.Qgen_payment.Qcreate_Payment([req.body.Payment_date,req.body.Total_value],(err,results)=>{
 				if (err){
 					console.log(err);
 					res.status(500).json({message:"Error creating Payment"});	
