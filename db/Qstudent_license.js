@@ -21,7 +21,7 @@ var Qget_byLicenseStudent =(student_license,idexam_center, cb)=>{
 
 // get record by id in student
 var Qget_Student_license =(student_license, cb)=>{
-	return myQuery('SELECT idStudent_license FROM anieca.student_license '+
+	return myQuery('SELECT idStudent_license FROM student_license '+
                         'where student_license.Student_license = ?',
 						[student_license],(error, results, fields) =>{
 		error ? cb(error) : cb(false,results);

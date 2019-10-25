@@ -131,7 +131,18 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 				}else{
 					return res.status(200).json(reservations);
 				};
-			});	
+			});
+		}else if (req.query.schedule){
+			dbHandlers.Qgen_reservations.Qget_AllReservationsforSchedule(req.params.idExam_center,(err, reservations)=>{
+				if (err) {
+					console.log(err);
+					return res.status(500).json({message: 'Error fetching reservations.'});
+				}else if (reservations.length === 0) {
+					return res.status(204).json({message: 'No reservations found.'});
+				}else{
+					return res.status(200).json(reservations);
+				};	
+			});		
 		}else{
 			dbHandlers.Qgen_reservations.Qget_AllPendentReservations(req.params.idExam_center,(err, reservations)=>{
 				if (err) {
