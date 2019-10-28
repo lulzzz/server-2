@@ -15,12 +15,9 @@ var getList_TimeslotByWeek = async (req, res) => {
 		// // console.log("beginningOfWeek " + beginningOfWeek);
 		// let endOfWeek = moment().week(req.query.week).year(req.query.year).startOf('week').add(6, 'days').local().format('YYYY-MM-DD');
 		// console.log("----------------- END WEEK " + endOfWeek)
-		
 		let beginningOfWeek = req.query.begin
-
 		console.log("----------------- BEGIN WEEK " + beginningOfWeek)
 		// console.log("beginningOfWeek " + beginningOfWeek);
-		
 		let endOfWeek = req.query.end
 		console.log("----------------- END WEEK " + endOfWeek)
 

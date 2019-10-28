@@ -180,12 +180,14 @@ var Qget_byIdEasyPay = (idEasyPay, cb) => {
 };
 
 // get easyPay references that don't have a payment
-var Qget_reservationWithouthEasyPayId = (cb) => {
-    return myQuery('SELECT reservation.idReservation, pendent_payments.Exam_price, temp_student.School_permit, Timeslot.Exam_center_idExam_center FROM reservation ' + 
-        'Inner join pendent_payments on pendent_payments.Reservation_idReservation = reservation.idReservation ' + 
-        'inner join temp_student on temp_student.Reservation_idReservation = reservation.idReservation ' +
-        'left join timeslot on reservation.Timeslot_idTimeslot = Timeslot.idTimeslot ' +
-        'where reservation.idEasypay IS NULL AND reservation.Lock_expiration_date IS NULL', [null],(error, results, fields) => {
+var Qget_reservationWithouthEasyPayId = (idexam_center,cb) => {
+    return myQuery('SELECT reservation.idReservation, pendent_payments.Exam_price, temp_student.School_permit, Timeslot.Exam_center_idExam_center '+
+        'FROM reservation ' + 
+        'INNER join pendent_payments on pendent_payments.Reservation_idReservation = reservation.idReservation ' + 
+        'INNER join temp_student on temp_student.Reservation_idReservation = reservation.idReservation ' +
+        'LEFT join timeslot on reservation.Timeslot_idTimeslot = Timeslot.idTimeslot ' +
+        'WHERE reservation.idEasypay IS NULL AND reservation.Lock_expiration_date IS NULL '+
+        'AND timeslot.Exam_center_idExam_center= ?', [idexam_center],(error, results, fields) => {
             error ? cb(error) : cb(false, results);
     });
 };

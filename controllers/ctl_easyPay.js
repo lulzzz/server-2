@@ -7,11 +7,12 @@ var moment=require('moment');
 
 var bulk = async (id_exam_center) => {
     // console.log('here');
-    dbHandlers.Qgen_reservations.Qget_reservationWithouthEasyPayId((error, result) => {
+    dbHandlers.Qgen_reservations.Qget_reservationWithouthEasyPayId(id_exam_center,(error, result) => {
         console.log("--------------------------------------------------------------------------------");
-        console.log("---------------------------------PROCESSO EASY PAY------------------------------");
+        console.log("---------------------------------PROCESSO EASY PAY "+ id_exam_center);
+        console.log(" -----------------------NUMERO DE VOLTAS "+ result.length);
         console.log("--------------------------------------------------------------------------------");
-        console.log(" -----------------------------NUMERO DE VOLTAS  "+ result.length);
+        console.log(JSON.stringify(result));
         if (error) {
             console.log(error);
             // return res.status(500).json({ message: "Error getting EasyPay ids." });
@@ -29,14 +30,10 @@ var bulk = async (id_exam_center) => {
                     // Exam_center_idExam_center:_.map(items,'Exam_center_idExam_center')
                 }))
                 .value()
-            console.log("-----------------------------------------------------------------COMPILAção"+ JSON.stringify(mapped));
             // console.log(withouthids);
             mapped.forEach(element => {
-                console.log("MENSAGEM PARA O EASY PAY" + JSON.stringify(element));
-
                 var today= moment().format("YYYY-MM-DD");
                 var nextclock=moment().add(10,'m').format("YYYY-MM-DD HH:mm");
-
                 var options = {
                     url: config.easy_pay.easy_pay_url,
                     method: 'POST',
@@ -52,11 +49,14 @@ var bulk = async (id_exam_center) => {
                         },
                         "expiration_time": nextclock,
                         "value": element.value,
-                        "method": "mb"
+                        "method": "mb",
+                        customer: {
+                            "name":element.School_permit
+                        }
                     },
                     json: true
                 };
-                console.log("ENVIADO PARA O EASY PAY" + JSON.stringify(options));
+                console.log("-----------ENVIADO PARA O EASY PAY" + JSON.stringify(options));
                 //send request to easypay
                 request(options, function (error, response, body) {
                     console.log("RECEBIDO DO EASY PAY REQUEST " + JSON.stringify(body));
@@ -235,16 +235,19 @@ var updateMissingPayments = (req, res, next) => {
                                                         idT_Status_check, Banks_idBanks],
                                                     (err, results) => {
                                                         if (err) {
+                                                            console.log(err);
                                                             console.log("Error creating transaction.");
                                                         } else {
                                                             var idTransaction = results.insertId;
                                                             dbHandlers.Qgen_transactions.Qupdate_Payment_Transaction(idTransaction, idPayment, (err) => {
                                                                 if (err) {
+                                                                    console.log(err);
                                                                     console.log("Error updating transaction.");
                                                                 } else {
                                                                     dbHandlers.Qgen_pendent_payments.Qpatch_PendentPaymentValues({ Payments_idPayments: idPayment }, idPendent_payments, (err) => {
                                                                         if (err) {
-                                                                            console.log("Error updating pendent payment.")
+                                                                            console.log(err);
+                                                                            console.log("Error updating pendent payment.");
                                                                         } else {
                                                                             console.log('payment created for element ', element);
                                                                         }
