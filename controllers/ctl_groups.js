@@ -50,9 +50,26 @@ var patchList_Groups = (req, res) => {
     };
 };
 
+// PATCH for max groups for given day
+var delete_Groups = (req, res) => {
+    if (req.params.idExam_center>0){
+        if (req.query.idGroup){
+            dbHandlers.Qgen_groups.Qdelete_groups(req.query.idGroup, (error) => {
+                if (error) {
+                    return res.status(500).json({message: 'There was an error while deleting given group.'});
+                }else{
+                    return res.status(200).json({message: 'Group deleted.'});   
+                };
+            });
+        };
+    }else{
+        return res.status(400).json({message: 'Bad request'});
+    };
+};
 
 module.exports = {
     get_dailyGroups,
     postList_Groups,
-    patchList_Groups
+    patchList_Groups,
+    delete_Groups
 }

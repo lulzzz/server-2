@@ -35,12 +35,20 @@ var Qpatch_groups = (values, id, idExam_Center, cb) => {
     });
 };
 
+// delete resources by id
+var Qdelete_groups = (id,cb)=>{
+    return myQuery('DELETE FROM daily_groups WHERE idGroups=? ',[id],(error, results, fields)=>{
+        error ? cb(error) : cb(false,results);
+    });
+};
+
 module.exports = () => {
     return {
         QMax_IDdailygroups,
         Qget_groupsByWeek,
         Qget_groupsByDay,
         Qpost_groups,
-        Qpatch_groups
+        Qpatch_groups,
+        Qdelete_groups
     }
 }

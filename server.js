@@ -178,6 +178,7 @@ app.delete('/api/centro-exames/:idExam_center/timeslot', controllers.timeslot.de
 app.get('/api/grupos', controllers.groups.get_dailyGroups);
 app.post('/api/centro-exames/:idExam_center/grupos', controllers.groups.postList_Groups);
 app.patch('/api/centro-exames/:idExam_center/grupos', controllers.groups.patchList_Groups);
+app.delete('/api/centro-exames/:idExam_center/grupos', controllers.groups.delete_Groups);
 // ------------------------------------------------------------------------------
 // Pendent Payments routes
 app.get('/api/centro-exames/:idExam_center/pagamentos-pendentes',controllers.pendent_payments.getList_Pendent_Payments);
