@@ -282,7 +282,7 @@ var POST_easyPay = (req, res, next) => {
                 if (reservation.length <= 0) {
                     return res.status(400).json({ message: "EasyPay ID not found." });
                 } else {
-                    // var {idPendent_payments,Exam_price,Exam_center_idExam_center}=reservation[0];
+                    var {idPendent_payments,Exam_price,Exam_center_idExam_center}=reservation[0];
                     dbHandlers.Qgen_payment.Qcreate_Payment([date, Exam_price],(err,results)=>{
                         if(err){
                             console.log(err);
