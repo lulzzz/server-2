@@ -272,70 +272,64 @@ var updateMissingPayments = (req, res, next) => {
 
 var POST_easyPay = (req, res, next) => {
     if (req.headers["x-easypay-code"] === config.easy_pay.easy_pay_header_code) {
-        var idEasyPay = req.body.id
-        var date = new Date().toISOString()
-        dbHandlers.Qgen_reservations.Qget_byIdEasyPay(idEasyPay, (err, results) => {
+        var idEasyPay = req.body.id;
+        var date = new Date().toISOString();
+        dbHandlers.Qgen_reservations.Qget_byIdEasyPay(idEasyPay, (err, reservation) => {
             if (err) {
                 console.log(err);
-                return res.status(500).json({ message: "Error getting info from reservation by EasyPay id." })
+                return res.status(500).json({ message: "Error getting info from reservation by EasyPay id." });
             } else {
-                if (results <= 0) {
-                    return res.status(400).json({ message: "EasyPay ID not found." })
+                if (reservation.length <= 0) {
+                    return res.status(400).json({ message: "EasyPay ID not found." });
                 } else {
-                    var { idPendent_payments, Exam_price, Exam_center_idExam_center } = results[0]
-                    dbHandlers.Qgen_payment.Qcreate_Payment([date, Exam_price], (err, results) => {
-                        if (err) {
+                    var {idPendent_payments,Exam_price,Exam_center_idExam_center}=results[0];
+                    dbHandlers.Qgen_payment.Qcreate_Payment([date, Exam_price],(err,results)=>{
+                        if(err){
                             console.log(err);
-                            return res.status(500).json({ message: "Error creating payment." })
-                        } else {
+                            return res.status(500).json({message: "Error creating payment."});
+                        }else{
                             var idPayment = results.insertId;
                             var Transaction_num = null;
                             var idT_Status_check = null;
                             var Banks_idBanks = null;
-                            var Transaction_date = date.slice(0, 10)
-                            var School_idSchool = null
-                            var Payment_method_idPayment_method = 5
+                            var Transaction_date = date.slice(0, 10);
+                            var School_idSchool = reservation[0].idschool;
+                            var Payment_method_idPayment_method = 5;
 
-                            dbHandlers.Qgen_transactions.Qcreate_Transactions(
-                                [Transaction_num,
-                                    Exam_price,
-                                    Transaction_date,
-                                    Exam_center_idExam_center,
-                                    School_idSchool,
-                                    Payment_method_idPayment_method,
-                                    idT_Status_check, Banks_idBanks],
-                                (err, results) => {
-                                    if (err) {
-                                        console.log(err);
-                                        return res.status(500).json({ message: "Error creating transaction." })
-                                    } else {
-                                        var idTransaction = results.insertId;
-                                        dbHandlers.Qgen_transactions.Qupdate_Payment_Transaction(idTransaction, idPayment, (err) => {
-                                            if (err) {
-                                                console.log(err);
-                                                return res.status(500).json({ message: "Error updating transaction." })
-                                            } else {
-                                                dbHandlers.Qgen_pendent_payments.Qpatch_PendentPaymentValues({ Payments_idPayments: idPayment }, idPendent_payments, (err) => {
-                                                    if (err) {
-                                                        console.log(err);
-                                                        return res.status(500).json({ message: "Error updating pendent payment." })
-                                                    } else {
-                                                        return res.json({ message: 'OK' });
-                                                    }
-                                                })
-                                            }
-                                        })
-                                    };
-                                });
-                        }
-                    })
-                }
-            }
-        })
-    } else {
-        return res.status(400).send("Wrong header x-code.")
-    }
-}
+                            dbHandlers.Qgen_transactions.Qcreate_Transactions([Transaction_num,Exam_price,Transaction_date,Exam_center_idExam_center,
+                                        School_idSchool,Payment_method_idPayment_method,idT_Status_check, Banks_idBanks],(err, results) => {
+                                if(err){
+                                    console.log(err);
+                                    return res.status(500).json({message:"Error creating transaction."});
+                                }else{
+                                    var idTransaction = results.insertId;
+                                    dbHandlers.Qgen_transactions.Qupdate_Payment_Transaction(idTransaction,idPayment,(err)=>{
+                                        if(err){
+                                            console.log(err);
+                                            return res.status(500).json({message:"Error updating transaction."});
+                                        }else{
+                                            dbHandlers.Qgen_pendent_payments.Qpatch_PendentPaymentValues({Payments_idPayments:idPayment},
+                                                        idPendent_payments,(err)=>{
+                                                if(err){
+                                                    console.log(err);
+                                                    return res.status(500).json({message:"Error updating pendent payment."});
+                                                }else{
+                                                    return res.status(200).json({message:'OK'});
+                                                };
+                                            });
+                                        };
+                                    });
+                                };
+                            });
+                        };
+                    });
+                };
+            };
+        });
+    }else{
+        return res.status(400).json({message:"Wrong header x-code."});
+    };
+};
 
 module.exports = {
     bulk,
