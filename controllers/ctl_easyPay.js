@@ -282,8 +282,8 @@ var POST_easyPay = (req, res, next) => {
                 if (reservation.length <= 0) {
                     return res.status(400).json({ message: "EasyPay ID not found." });
                 } else {
-                    var {idPendent_payments,Exam_price,Exam_center_idExam_center}=reservation[0];
-                    dbHandlers.Qgen_payment.Qcreate_Payment([date, Exam_price],(err,results)=>{
+                    var {idPendent_payments,totalprice,Exam_center_idExam_center}=reservation[0];
+                    dbHandlers.Qgen_payment.Qcreate_Payment([date, totalprice],(err,results)=>{
                         if(err){
                             console.log(err);
                             return res.status(500).json({message: "Error creating payment."});
@@ -296,7 +296,7 @@ var POST_easyPay = (req, res, next) => {
                             var School_idSchool = reservation[0].idschool;
                             var Payment_method_idPayment_method = 5;
 
-                            dbHandlers.Qgen_transactions.Qcreate_Transactions([Transaction_num,Exam_price,Transaction_date,Exam_center_idExam_center,
+                            dbHandlers.Qgen_transactions.Qcreate_Transactions([Transaction_num,totalprice,Transaction_date,Exam_center_idExam_center,
                                         School_idSchool,Payment_method_idPayment_method,idT_Status_check, Banks_idBanks],(err, results) => {
                                 if(err){
                                     console.log(err);

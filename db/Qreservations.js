@@ -193,6 +193,30 @@ var Qget_byIdEasyPay = (idEasyPay, cb) => {
         });
 };
 
+// search for reservations that has easypay key giving the total price paid as well
+var Qget_byIdEasyPay = (idEasyPay, cb) => {
+    return myQuery("SELECT easypay.*,sumtotal.totalprice "+
+                "FROM "+
+                "(SELECT reservation.idReservation, pendent_payments.idPendent_payments, "+
+                    "reservation.idEasyPay, pendent_payments.Exam_price, timeslot.Exam_center_idExam_center,school.idschool "+
+                    "FROM reservation "+
+                    "INNER JOIN pendent_payments ON reservation.idReservation = pendent_payments.Reservation_idReservation "+
+                    "INNER JOIN timeslot ON reservation.Timeslot_idTimeslot = timeslot.idTimeslot "+
+                    "LEFT JOIN temp_Student ON Reservation.idReservation=temp_Student.Reservation_idReservation "+
+                    "LEFT JOIN school ON temp_Student.School_Permit=School.Permit "+
+                    "WHERE idEasyPay = ?) AS easypay, "+
+                "(SELECT SUM(pendent_payments.Exam_price) as totalprice "+
+                    "FROM reservation "+
+                    "INNER JOIN pendent_payments ON reservation.idReservation = pendent_payments.Reservation_idReservation "+
+                    "INNER JOIN timeslot ON reservation.Timeslot_idTimeslot = timeslot.idTimeslot "+
+                    "LEFT JOIN temp_Student ON Reservation.idReservation=temp_Student.Reservation_idReservation "+
+                    "LEFT JOIN school ON temp_Student.School_Permit=School.Permit "+
+                    "WHERE idEasyPay = ?) AS sumtotal",
+                [idEasyPay,idEasyPay], (error, results, fields) => {
+        error ? cb(error) : cb(false, results);
+    });
+};
+
 // get easyPay references that don't have a payment
 var Qget_reservationWithouthEasyPayId = (idexam_center,cb) => {
     return myQuery('SELECT reservation.idReservation, pendent_payments.Exam_price, temp_student.School_permit, Timeslot.Exam_center_idExam_center '+
