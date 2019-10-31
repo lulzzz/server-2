@@ -250,25 +250,25 @@ var updateMissingPayments = (req, res, next) => {
                                                                             console.log("Error updating pendent payment.");
                                                                         } else {
                                                                             console.log('payment created for element ', element);
-                                                                        }
-                                                                    })
-                                                                }
-                                                            })
+                                                                        };
+                                                                    });
+                                                                };
+                                                            });
                                                         };
                                                     });
-                                            }
-                                        })
-                                    }
-                                }
-                            })
-                        }
-                    }
-                })
-            }
-        }
-        return res.json({message: 'Done.'})
-    })
-}
+                                            };
+                                        });
+                                    };
+                                };
+                            });
+                        };
+                    };
+                });
+            };
+        };
+        return res.status(200).json({message: 'Done.'});
+    });
+};
 
 var POST_easyPay = (req, res, next) => {
     if (req.headers["x-easypay-code"] === config.easy_pay.easy_pay_header_code) {

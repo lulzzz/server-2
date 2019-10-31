@@ -82,8 +82,8 @@ async function createBooking (req,res,next){
 			// Promise to get account id
 			var P_account=new Promise((resolve,reject)=>{
 				dbHandlers.Qgen_accounts.Qget_byUserAccount(req.user.user,(e,account)=>{
-					if(err){
-						console.log(err);
+					if(e){
+						console.log(e);
 						return res.status(500).send({message:"Error getting account"});
 						reject();
 					}else{

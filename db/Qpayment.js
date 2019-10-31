@@ -36,10 +36,11 @@ var Qget_Payments_without_invoice=(idexam_center,cb)=>{
 
 // get payments to be invoice
 var Qget_PaymentsInvoice=(idpayment,idexam_center,cb)=>{
-	return myQuery('SELECT payments_to_invoice.*, COUNT(*) AS `Quantity`,school.permit '+
-			'FROM payments_to_invoice,Transactions,school '+
+	return myQuery('SELECT payments_to_invoice.*, COUNT(pendent_payments.idPendent_payments) AS `Quantity`,school.permit '+
+			'FROM payments_to_invoice,Transactions,school, pendent_payments '+
 			'WHERE payments_to_invoice.idPayment=Transactions.Payments_idPayments '+
 			'AND Transactions.School_idSchool=School.idSchool '+
+            'AND pendent_payments.Payments_idPayments=payments_to_invoice.idPayment '+
 			'AND payments_to_invoice.idPayment = ? AND payments_to_invoice.Exam_center_idExam_center = ? '+
 			'GROUP BY payments_to_invoice.exam_type_code, payments_to_invoice.base_value, payments_to_invoice.idPayment',
 			[idpayment,idexam_center],(error, results, fields)=>{

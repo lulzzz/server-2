@@ -470,7 +470,14 @@ var P_generate_invoices_JSON = async(invoice,payments,idExam_center,cb)=>{
 				unitPrice:element.base_value,
 				quantity:element.Quantity,
 				tax:element.Tax
-			});	
+			});
+			if (element.exam_tax_price){
+					products.push({code:element.exam_tax_code,
+					unitPrice:element.exam_tax_price,
+					quantity:element.Quantity,
+					tax:0
+				});
+			};
 		});
 		// concatenate products for invoice
 		msg_invoice.products=products;
@@ -478,12 +485,12 @@ var P_generate_invoices_JSON = async(invoice,payments,idExam_center,cb)=>{
 		// concatenate transactions for invoice
 		msg_invoice.payments=payments;
 		invoice.push(msg_invoice);
-	}
+	};
 	cb(invoice);
 };
 
 // generate invoice request
-async function P_generate_invoice_request  (payments,idExam_center){
+async function P_generate_invoice_request (payments,idExam_center){
 	return await new Promise((resolve,reject) => {
 		try{
 			var invoice=[];
@@ -534,7 +541,9 @@ async function update_Payment (req,res,next){
 				request_msg.header=header;
 				request_msg.invoice=msg_invoices;
 				// send request to API invoices
-				console.log("Invoice requested");
+				console.log("------------Invoice requested-------------");
+				console.log(JSON.stringify(request_msg));
+				console.log("------------------------------------------");
 				request({
 					url:config.api_invoice.url,
 					method: 'POST',
