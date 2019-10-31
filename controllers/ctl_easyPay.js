@@ -308,15 +308,27 @@ var POST_easyPay = (req, res, next) => {
                                             console.log(err);
                                             return res.status(500).json({message:"Error updating transaction."});
                                         }else{
-                                            dbHandlers.Qgen_pendent_payments.Qpatch_PendentPaymentValues({Payments_idPayments:idPayment},
-                                                        idPendent_payments,(err)=>{
-                                                if(err){
-                                                    console.log(err);
-                                                    return res.status(500).json({message:"Error updating pendent payment."});
-                                                }else{
-                                                    return res.status(200).json({message:'OK'});
-                                                };
+                                            reservation.forEach(element => {
+                                                dbHandlers.Qgen_pendent_payments.Qpatch_PendentPaymentValues({Payments_idPayments:idPayment},
+                                                        element.idPendent_payments,(err)=>{
+                                                    if(err){
+                                                        console.log(err);
+                                                        // return res.status(500).json({message:"Error updating pendent payment."});
+                                                    }else{
+                                                        // return res.status(200).json({message:'OK'});
+                                                    };
+                                                });
                                             });
+                                            return res.status(200).json({message:'OK'});
+                                            // dbHandlers.Qgen_pendent_payments.Qpatch_PendentPaymentValues({Payments_idPayments:idPayment},
+                                            //             idPendent_payments,(err)=>{
+                                            //     if(err){
+                                            //         console.log(err);
+                                            //         return res.status(500).json({message:"Error updating pendent payment."});
+                                            //     }else{
+                                            //         return res.status(200).json({message:'OK'});
+                                            //     };
+                                            // });
                                         };
                                     });
                                 };
