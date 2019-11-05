@@ -122,16 +122,21 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 				});
 			};
 		}else if (req.query.idReservation){
-			dbHandlers.Qgen_reservations.Qget_byIdReservation(req.query.idReservation,(err,reservations)=>{
-				if(err){
-					console.log(err);
-					return res.status(500).json({message: 'Database error fetching reservation by id'});	
-				}else if(reservations.length === 0) {
-					return res.status(204).json({message: 'No reservations found.'});
-				}else{
-					return res.status(200).json(reservations);
-				};
-			});
+			if(req.query.file){
+				// get and send back model 2 file for given id reservation
+
+			}else{
+				dbHandlers.Qgen_reservations.Qget_byIdReservation(req.query.idReservation,(err,reservations)=>{
+					if(err){
+						console.log(err);
+						return res.status(500).json({message: 'Database error fetching reservation by id'});	
+					}else if(reservations.length === 0) {
+						return res.status(204).json({message: 'No reservations found.'});
+					}else{
+						return res.status(200).json(reservations);
+					};
+				});
+			};
 		}else if (req.query.schedule){
 			dbHandlers.Qgen_reservations.Qget_AllReservationsforSchedule(req.params.idExam_center,(err, reservations)=>{
 				if (err) {
@@ -734,3 +739,107 @@ module.exports = {
 												// 		});
 												// 	};
 												// });
+
+
+
+
+
+
+
+// 												var express = require('express');
+// var app = express();
+// var router = express.Router();
+// var multer = require('multer');
+// var upload = multer({
+//   dest: "tmp/"
+// });
+// var fs = require('fs');
+// var async = require('async');
+// var AWS = require('aws-sdk');
+// // Configure AWS SDK here
+// var s3 = new AWS.s3({
+//   params: {
+//     Bucket: 'xxx'
+//   }
+// });
+
+// /**
+//  * Authentication middleware
+//  *
+//  * It will be called for any routes starting with /files
+//  */
+// app.use("/files", function (req, res, next) {
+//   var authorized = true; // use custom logic here
+//   if (!authorized) {
+//     return res.status(403).end("not authorized");
+//   }
+//   next();
+// });
+
+// // Route for the upload
+// app.post("/files/upload", upload.single("form-field-name"), function (req, res) {
+//   var fileInfo = console.log(req.file);
+//   var fileStream = fs.readFileSync(fileInfo.path);
+//   var options = {
+//     Bucket: 'xxx',
+//     Key: 'yyy/'+fileName,
+//     Body: fileStream
+//   };
+
+//   s3.upload(options, function (err) {
+//     // Remove the temporary file
+//     fs.removeFileSync("tmp/"+fileInfo.path); // ideally use the async version
+//     if (err) {
+//       return res.status(500).end("Upload to s3 failed");
+//     }
+//     res.status(200).end("File uploaded");
+//   });
+// });
+
+// // Route for the download
+// app.get("/files/download/:name", function (req, res) {
+//   var fileName = req.params.name;
+//   if (!fileName) {
+//     return res.status(400).end("missing file name");
+//   }
+//   var options = {
+//     Bucket: 'xxx',
+//     Key: 'yyy/'+fileName
+//   };
+//   res.attachment(fileName);
+//   s3.getObject(options).createReadStream().pipe(res);
+// });
+
+// app.listen(3000);
+// ----------------------------------------------------------------------------------------
+// const AWS = require('aws-sdk');
+// const fs = require('fs');
+// const path = require('path');
+
+// //configuring the AWS environment
+// AWS.config.update({
+//     accessKeyId: "<Access Key Here>",
+//     secretAccessKey: "<Secret Access Key Here>"
+//   });
+
+// var s3 = new AWS.S3();
+// var filePath = "./data/file.txt";
+
+// //configuring parameters
+// var params = {
+//   Bucket: '<Bucket Name Here>',
+//   Body : fs.createReadStream(filePath),
+//   Key : "folder/"+Date.now()+"_"+path.basename(filePath)
+// };
+
+// s3.upload(params, function (err, data) {
+//   //handle error
+//   if (err) {
+//     console.log("Error", err);
+//   }
+
+//   //success
+//   if (data) {
+//     console.log("Uploaded in:", data.Location);
+//   }
+// });

@@ -549,7 +549,10 @@ async function update_Payment (req,res,next){
 					method: 'POST',
 					json:request_msg
 				},(error, response, body)=>{
+					console.log("------------Invoice received-------------");
 					console.log("Invoice received");
+					console.log(JSON.stringify(body));
+					console.log("------------------------------------------");
 					if ("references" in body){
 						it_idpayment=0;
 						for (const key of Object.keys(body.references)) {
