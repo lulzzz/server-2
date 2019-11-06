@@ -419,35 +419,38 @@ var patchList_Reservations=async(req,res,next)=>{
 					}else{
 						if (req.query.idTemp_Student) { // Update the temporary student
 							// console.log("--------PATCH RESERVA " + JSON.stringify(req.body));
-							
-							dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
-										'T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 'Drive_license_num','Obs',
-										'School_Permit', 'Type_category_idType_category', 'Student_license', 'Expiration_date','Student_num',
-										'exam_expiration_date']),req.query.idTemp_Student, (error) => { // Modifies the student
-								if (error) {
-									console.log(error);
-									return res.status(500).json({message: 'Error trying to update the reservation student.'});
-								}else{
-									return res.status(200).json({message: 'Reservation updated.'});
-								};
-							});		
+							let tmp_st=_.pick(req.body, ['T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 
+										'Drive_license_num','Obs','School_Permit', 'Type_category_idType_category', 'Student_license', 
+										'Expiration_date','Student_num','exam_expiration_date']);
+							if (tmp_st.length>0){
+								dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(tmp_st,req.query.idTemp_Student, (error) => { // Modifies the student
+									if (error) {
+										console.log(error);
+										return res.status(500).json({message: 'Error trying to update the reservation student.'});
+									}else{
+										return res.status(200).json({message: 'Reservation updated.'});
+									};
+								});	
+							};	
 						}else{
 							return res.status(200).json({message: 'Reservation updated.'});
 						};
 					};
 				});
 			}else if (req.query.idTemp_Student) { // Update the temporary student
-				dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
-							'T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 'Drive_license_num','Obs','School_Permit', 
-							'Type_category_idType_category', 'Student_license', 'Expiration_date','Student_num','exam_expiration_date']), 
-							req.query.idTemp_Student, (error) => { // Modifies the student
-					if (error) {
-						console.log(error);
-						return res.status(500).json({message: 'Error trying to update the rewsrevation student.'});
-					}else{
-						return res.status(200).json({message: 'Reservation updated.'});
-					};
-				});
+				let tmp_st=_.pick(req.body, ['T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 
+										'Drive_license_num','Obs','School_Permit', 'Type_category_idType_category', 'Student_license', 
+										'Expiration_date','Student_num','exam_expiration_date']);
+				if (tmp_st.length>0){
+					dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(tmp_st,req.query.idTemp_Student, (error) => { // Modifies the student
+						if (error) {
+							console.log(error);
+							return res.status(500).json({message: 'Error trying to update the rewsrevation student.'});
+						}else{
+							return res.status(200).json({message: 'Reservation updated.'});
+						};
+					});
+				};
 			}else if (req.query.aprove){
 				dbHandlers.Qgen_exam_status.Qget_byProcessPendentID(0,(err,idpending)=>{
 					if(err){
