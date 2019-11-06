@@ -409,7 +409,7 @@ var patchList_Reservations=async(req,res,next)=>{
 	if (req.query.idReservation) {
 		if(!req.query.cancel){
 			// var response_flag=false;
-			if (req.body.Exam_type_idExam_type || req.body.T_exam_status_idexam_status){
+			if (req.body.Exam_type_idExam_type || req.body.T_exam_status_idexam_status || req.body.Car_plate){
 				dbHandlers.Qgen_reservations.Qpatch_reservation(_.pick(req.body, ['Exam_type_idExam_type', 'T_exam_status_idexam_status','Car_plate']),
 							req.query.idReservation,(error) => { // Modifies the locked reservation
 					if (error) {
