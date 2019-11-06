@@ -10,7 +10,8 @@ var Qpost_temp_Student = (object, cb) => {
 
 // patch tem student for reservations
 var Qpatch_Temp_Student = (values, id, cb) => {
-    return myQuery("UPDATE Temp_Student SET ? WHERE idTemp_Student=?;", [values, id], (error,results,fields) => {
+    console.log("VALORES DO PATCH : " + JSON.stringify(values));
+    return myQuery("UPDATE Temp_Student SET ? WHERE idTemp_Student=?", [values, id], (error,results,fields) => {
         error ? cb(error) : cb(false,results);
     });
 };
