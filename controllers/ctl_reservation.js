@@ -420,8 +420,8 @@ var patchList_Reservations=async(req,res,next)=>{
 						if (req.query.idTemp_Student) { // Update the temporary student
 							console.log("--------PATCH RESERVA " + JSON.stringify(req.body));
 							dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
-										'T_ID_Type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'tax_num', 'Drive_license_num','Obs',
-										'School_Permit', 'idType_category', 'Student_license', 'Student_license_Expiration_date','Student_num',
+										'T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 'Drive_license_num','Obs',
+										'School_Permit', 'Type_category_idType_category', 'Student_license', 'Expiration_date','Student_num',
 										'exam_expiration_date']),req.query.idTemp_Student, (error) => { // Modifies the student
 								if (error) {
 									console.log(error);
@@ -437,8 +437,8 @@ var patchList_Reservations=async(req,res,next)=>{
 				});
 			}else if (req.query.idTemp_Student) { // Update the temporary student
 				dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
-							'T_ID_Type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'tax_num', 'Drive_license_num','Obs','School_Permit', 
-							'idType_category', 'Student_license', 'Student_license_Expiration_date','Student_num','exam_expiration_date']), 
+							'T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 'Drive_license_num','Obs','School_Permit', 
+							'Type_category_idType_category', 'Student_license', 'Expiration_date','Student_num','exam_expiration_date']), 
 							req.query.idTemp_Student, (error) => { // Modifies the student
 					if (error) {
 						console.log(error);
