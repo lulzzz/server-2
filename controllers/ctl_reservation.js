@@ -410,7 +410,7 @@ var patchList_Reservations=async(req,res,next)=>{
 		if(!req.query.cancel){
 			// var response_flag=false;
 			if (req.body.Exam_type_idExam_type || req.body.T_exam_status_idexam_status){
-				dbHandlers.Qgen_reservations.Qpatch_reservation(_.pick(req.body, ['Exam_type_idExam_type', 'T_exam_status_idexam_status']),
+				dbHandlers.Qgen_reservations.Qpatch_reservation(_.pick(req.body, ['Exam_type_idExam_type', 'T_exam_status_idexam_status','Car_plate']),
 							req.query.idReservation,(error) => { // Modifies the locked reservation
 					if (error) {
 						console.log(error);
@@ -418,7 +418,8 @@ var patchList_Reservations=async(req,res,next)=>{
 						return res.status(500).json({message:'Error updating the reservation.'});
 					}else{
 						if (req.query.idTemp_Student) { // Update the temporary student
-							console.log("--------PATCH RESERVA " + JSON.stringify(req.body));
+							// console.log("--------PATCH RESERVA " + JSON.stringify(req.body));
+							
 							dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(_.pick(req.body, [
 										'T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 'Drive_license_num','Obs',
 										'School_Permit', 'Type_category_idType_category', 'Student_license', 'Expiration_date','Student_num',
@@ -569,7 +570,7 @@ var patchList_Reservations=async(req,res,next)=>{
 																				req.body.idReservation],(err,results)=>{
 																		if (err){
 																			console.log(err);
-																			return res.status(500).send({message:"Error creating booking"});
+																			return res.status(500).json({message:"Error creating booking"});
 																		}else{
 																			dbHandlers.Qgen_exam_status.Qget_byProcessAprovedID(0,(e,id_status)=>{
 																				if (e){
@@ -580,9 +581,9 @@ var patchList_Reservations=async(req,res,next)=>{
 																								req.body.idReservation,(e)=>{
 																						if (e){
 																							console.log(e);
-																							return res.status(500).send({message:"Error creating booking"});
+																							return res.status(500).json({message:"Error creating booking"});
 																						}else{
-																							return res.status(200).send({message:"Booking created"});
+																							return res.status(200).json({message:"Booking created"});
 																						};
 																					});
 																				};
