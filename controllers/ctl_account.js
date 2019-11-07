@@ -60,9 +60,7 @@ module.exports = {
 					res.status(500).json({message:"Error searching exam center"});
 				}else{
 					let School_idSchool=_.pick(req.body,['School_idSchool']);
-					if (_.size(School_idSchool)>0){
-					// if(req.body.School_idSchool != null || req.body.School_idSchool != ''){
-						console.log("-----------------School ID " + School_idSchool);
+					if (_.isInteger(School_idSchool)){
 						dbHandlers.Qgen_accounts.Qcreate_Account([req.body.user,hash,salt,
 										user_name,user_email,1,createdate,null,1,
 										req.body.Exam_center_idExam_center,exam_center[0].Exam_center_name,
@@ -80,7 +78,6 @@ module.exports = {
 							};
 						});
 					}else{
-						console.log("------------------School ID " + School_idSchool);
 						dbHandlers.Qgen_accounts.Qcreate_Account([req.body.user,hash,salt,
 										user_name,user_email,1,createdate,null,1,
 										req.body.Exam_center_idExam_center,exam_center[0].Exam_center_name,
