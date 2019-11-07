@@ -58,22 +58,42 @@ module.exports = {
 					console.log(error);
 					res.status(500).json({message:"Error searching exam center"});
 				}else{
-					dbHandlers.Qgen_accounts.Qcreate_Account([req.body.user,hash,salt,
-									user_name,user_email,1,createdate,null,1,
-									req.body.Exam_center_idExam_center,exam_center[0].Exam_center_name,
-									req.body.role.idRole,req.body.School_idSchool],(e,r)=>{
-						if(e){
-							if(e.code == "ER_DUP_ENTRY"){
-								res.status(400).json({message:"User already exists"});
+					if(req.body.School_idSchool != null || req.body.School_idSchool != ''){
+						dbHandlers.Qgen_accounts.Qcreate_Account([req.body.user,hash,salt,
+										user_name,user_email,1,createdate,null,1,
+										req.body.Exam_center_idExam_center,exam_center[0].Exam_center_name,
+										req.body.role.idRole,req.body.School_idSchool],(e,r)=>{
+							if(e){
+								if(e.code == "ER_DUP_ENTRY"){
+									res.status(400).json({message:"User already exists"});
+								}else{
+									console.log(e);
+									res.status(500).json({message:"Error creating account"})
+								}
 							}else{
-								console.log(e);
-								res.status(500).json({message:"Error creating account"})
-							}
-						}else{
-							console.log("Account created");
-							res.status(200).json({token: generateToken({_id: r.insertId, user: req.body.user, idExam_center:temp_idExam_center})})
-						};
-					});	
+								console.log("Account created");
+								res.status(200).json({token: generateToken({_id: r.insertId, user: req.body.user, idExam_center:temp_idExam_center})})
+							};
+						});
+					}else{
+						console.log("School ID " + req.body.School_idSchool);
+						dbHandlers.Qgen_accounts.Qcreate_Account([req.body.user,hash,salt,
+										user_name,user_email,1,createdate,null,1,
+										req.body.Exam_center_idExam_center,exam_center[0].Exam_center_name,
+										req.body.role.idRole,null],(e,r)=>{
+							if(e){
+								if(e.code == "ER_DUP_ENTRY"){
+									res.status(400).json({message:"User already exists"});
+								}else{
+									console.log(e);
+									res.status(500).json({message:"Error creating account"})
+								}
+							}else{
+								console.log("Account created");
+								res.status(200).json({token: generateToken({_id: r.insertId, user: req.body.user, idExam_center:temp_idExam_center})})
+							};
+						});
+					};
 				};
 			});
 		}else{
