@@ -41,14 +41,14 @@ module.exports = {
 			temp_idExam_center=req.body.Exam_center_idExam_center;
 
 			let user_name;
-			if (req.body.user_name){
-				user_name=req.body.user_name;
+			if (req.body.User_name){
+				user_name=req.body.User_name;
 			}else{
 				user_name=null;
 			};
 			let user_email;
-			if (req.body.user_email){
-				user_email=req.body.user_email;
+			if (req.body.User_email){
+				user_email=req.body.User_email;
 			}else{
 				user_email=null;
 			};
