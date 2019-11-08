@@ -124,7 +124,7 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 		}else if (req.query.idReservation){
 			if(req.query.file){
 				// get and send back model 2 file for given id reservation
-
+				return res.status(200).download('./reservas/Print.pdf');
 			}else{
 				dbHandlers.Qgen_reservations.Qget_byIdReservation(req.query.idReservation,(err,reservations)=>{
 					if(err){
