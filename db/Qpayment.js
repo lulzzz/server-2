@@ -12,8 +12,16 @@ var Qget_AllByExam_Center_Payments = (idexam_center,cb)=>{
 				'WHERE payment.idPayment=pendent_payments.Payments_idPayments '+
 					'AND pendent_payments.Student_license_idStudent_license=Student_license.idStudent_license '+
 					'AND Student_license.School_idSchool=School.idSchool ' +
-					'AND School.Exam_center_idExam_center=? ',
-					[idexam_center],(error, results, fields)=>{
+					'AND School.Exam_center_idExam_center=? '+
+        		'UNION '+ 
+        		'SELECT payment.*,temp_student.School_Permit,School.school_name '+
+        		'FROM payment,pendent_payments,school,reservation,temp_student '+
+        		'WHERE payment.idPayment=pendent_payments.Payments_idPayments '+
+        			'AND pendent_payments.Reservation_idReservation=Reservation.idReservation '+
+                    'AND temp_student.Reservation_idReservation=Reservation.idReservation '+
+					'AND temp_student.School_Permit=School.Permit '+
+					'AND School.Exam_center_idExam_center=?',
+					[idexam_center,idexam_center],(error, results, fields)=>{
 		error ? cb(error) : cb(false,results);
 	});
 };

@@ -28,7 +28,6 @@ var get_Accounts = (req,res,next)=>{
 	});
 };
 
-
 module.exports = {
 	register : (req,res)=>{
 		if(req.body.user && req.body.password){
