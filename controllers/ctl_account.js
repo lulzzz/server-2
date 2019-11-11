@@ -144,7 +144,7 @@ module.exports = {
 					});	
 				}else{
 					console.log(info);
-					return res.status(401).json({message:"Wrong Credentials"});
+					return res.status(401).json({message:"Wrong Password"});
 				};
 			})(req,res);
 		};
