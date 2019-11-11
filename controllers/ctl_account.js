@@ -141,11 +141,10 @@ module.exports = {
 											token: token});
 		    				});	
 						};
-					});
-					
+					});	
 				}else{
 					console.log(info);
-					return res.status(401).json();
+					return res.status(401).json({message:"Wrong Credentials"});
 				};
 			})(req,res);
 		};
