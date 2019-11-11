@@ -1,11 +1,12 @@
 // get all pendent reservations for given date
 var Qget_AllPendentReservations=(idExam_center,cb)=>{
-    return myQuery('SELECT reservation.*,temp_student.*, School_name,'+
+    return myQuery('SELECT reservation.*,T_exam_status.Status,temp_student.*, School_name,'+
                     'Type_category.idType_category, Type_category.Category, Exam_type.Exam_type_name,'+
                     'timeslot.idTimeslot,timeslot.Timeslot_date,timeslot.Begin_time,timeslot.End_time,timeslot.Exam_group '+
                 'FROM reservation ' +
                 'LEFT JOIN Exam_type ON reservation.Exam_type_idExam_type=Exam_type.idExam_type ' +
                 'LEFT JOIN Type_category ON Exam_type.Type_category_idType_category = Type_category.idType_category ' +
+                'LEFT JOIN T_exam_status ON reservation.T_exam_status_idexam_status=T_exam_status.idexam_status ' +
                 'INNER JOIN Timeslot ON reservation.Timeslot_idTimeslot = Timeslot.idTimeslot ' +
                 'LEFT JOIN Temp_Student ON Temp_Student.Reservation_idReservation = reservation.idReservation ' +
                 'LEFT JOIN T_ID_type ON T_ID_type.idT_ID_type = Temp_Student.T_ID_type_idT_ID_type ' +
@@ -19,12 +20,13 @@ var Qget_AllPendentReservations=(idExam_center,cb)=>{
 
 // get all pendent reservations for given date
 var Qget_AllReservationsforSchedule=(idExam_center,cb)=>{
-    return myQuery('SELECT reservation.*,temp_student.*, School_name,'+
+    return myQuery('SELECT reservation.*,T_exam_status.Status,temp_student.*, School_name,'+
                     'Type_category.idType_category, Type_category.Category, Exam_type.Exam_type_name,'+
                     'timeslot.idTimeslot,timeslot.Timeslot_date,timeslot.Begin_time,timeslot.End_time,timeslot.Exam_group '+
                 'FROM reservation ' +
                 'LEFT JOIN Exam_type ON reservation.Exam_type_idExam_type=Exam_type.idExam_type ' +
                 'LEFT JOIN Type_category ON Exam_type.Type_category_idType_category = Type_category.idType_category ' +
+                'LEFT JOIN T_exam_status ON reservation.T_exam_status_idexam_status=T_exam_status.idexam_status ' +
                 'INNER JOIN Timeslot ON reservation.Timeslot_idTimeslot = Timeslot.idTimeslot ' +
                 'LEFT JOIN Temp_Student ON Temp_Student.Reservation_idReservation = reservation.idReservation ' +
                 'LEFT JOIN T_ID_type ON T_ID_type.idT_ID_type = Temp_Student.T_ID_type_idT_ID_type ' +
@@ -38,12 +40,13 @@ var Qget_AllReservationsforSchedule=(idExam_center,cb)=>{
 
 // get resevation by timeslot
 var Qget_byIdReservation = (id, cb) => {
-    return myQuery('SELECT reservation.*,temp_student.*, School_name,'+
+    return myQuery('SELECT reservation.*,T_exam_status.Status,temp_student.*, School_name,'+
                     'Type_category.idType_category, Type_category.Category, Exam_type.Exam_type_name,timeslot.idTimeslot, '+
                     'timeslot.Timeslot_date, timeslot.Begin_time, timeslot.End_time,timeslot.Exam_group '+
             'FROM reservation ' +
             'LEFT JOIN Exam_type ON reservation.Exam_type_idExam_type=Exam_type.idExam_type ' +
             'LEFT JOIN Type_category ON Exam_type.Type_category_idType_category = Type_category.idType_category ' +
+            'LEFT JOIN T_exam_status ON reservation.T_exam_status_idexam_status=T_exam_status.idexam_status ' +
             'INNER JOIN Timeslot ON reservation.Timeslot_idTimeslot = Timeslot.idTimeslot ' +
             'LEFT JOIN Temp_Student ON Temp_Student.Reservation_idReservation = reservation.idReservation ' +
             'LEFT JOIN T_ID_type ON T_ID_type.idT_ID_type = Temp_Student.T_ID_type_idT_ID_type ' +
@@ -55,12 +58,13 @@ var Qget_byIdReservation = (id, cb) => {
 
 // get resevation by timeslot
 var Qget_reservationsDetailedByTimeslot = (idTimeslot, idExam_center, cb) => {
-    return myQuery("SELECT reservation.*,temp_student.*, School_name,"+
+    return myQuery("SELECT reservation.*,T_exam_status.Status,temp_student.*, School_name,"+
                     "Type_category.idType_category, Type_category.Category, Exam_type.Exam_type_name,timeslot.idTimeslot, "+
                     "timeslot.Timeslot_date, timeslot.Begin_time, timeslot.End_time,timeslot.Exam_group "+
                 "FROM reservation " +
                 "LEFT JOIN Exam_type ON Exam_type.idExam_type = reservation.Exam_type_idExam_type " +
                 "LEFT JOIN Type_category ON Exam_type.Type_category_idType_category = Type_category.idType_category " +
+                "LEFT JOIN T_exam_status ON reservation.T_exam_status_idexam_status=T_exam_status.idexam_status " +
                 "INNER JOIN Timeslot ON reservation.Timeslot_idTimeslot = Timeslot.idTimeslot " +
                 "LEFT JOIN Temp_Student ON Temp_Student.Reservation_idReservation = reservation.idReservation " +
                 "LEFT JOIN T_ID_type ON T_ID_type.idT_ID_type = Temp_Student.T_ID_type_idT_ID_type " +
