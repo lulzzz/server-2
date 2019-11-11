@@ -414,17 +414,13 @@ var patchList_Reservations=async(req,res,next)=>{
 							req.query.idReservation,(error) => { // Modifies the locked reservation
 					if (error) {
 						console.log(error);
-						// response_flag=false;
 						return res.status(500).json({message:'Error updating the reservation.'});
 					}else{
 						if (req.query.idTemp_Student) { // Update the temporary student
 							// console.log("--------PATCH RESERVA " + JSON.stringify(req.body));
-							let tmp_st=_.pick(req.body, ['T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 
+							var tmp_st=_.pick(req.body, ['T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 
 										'Drive_license_num','Obs','School_Permit', 'Type_category_idType_category', 'Student_license', 
 										'Expiration_date','Student_num','exam_expiration_date']);
-							// console.log("-------------------ESTUDANTE TEMP "+JSON.stringify(tmp_st))
-
-
 							if (_.size(tmp_st)>0){
 								dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(tmp_st,req.query.idTemp_Student, (error) => { // Modifies the student
 									if (error) {
@@ -434,7 +430,9 @@ var patchList_Reservations=async(req,res,next)=>{
 										return res.status(200).json({message: 'Reservation updated.'});
 									};
 								});	
-							};	
+							}else{
+								return res.status(200).json({message: 'Reservation updated.'});
+							};
 						}else{
 							return res.status(200).json({message: 'Reservation updated.'});
 						};
@@ -444,8 +442,6 @@ var patchList_Reservations=async(req,res,next)=>{
 				let tmp_st=_.pick(req.body, ['T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 
 										'Drive_license_num','Obs','School_Permit', 'Type_category_idType_category', 'Student_license', 
 										'Expiration_date','Student_num','exam_expiration_date']);
-				// console.log("-------------------ESTUDANTE TEMP "+JSON.stringify(tmp_st))
-
 				if (_.size(tmp_st)>0){
 					dbHandlers.Qgen_temp_student.Qpatch_Temp_Student(tmp_st,req.query.idTemp_Student, (error) => { // Modifies the student
 						if (error) {
@@ -455,7 +451,9 @@ var patchList_Reservations=async(req,res,next)=>{
 							return res.status(200).json({message: 'Reservation updated.'});
 						};
 					});
-				};
+				}else{
+					return res.status(200).json({message: 'Reservation updated.'});
+				}
 			}else if (req.query.aprove){
 				dbHandlers.Qgen_exam_status.Qget_byProcessPendentID(0,(err,idpending)=>{
 					if(err){
