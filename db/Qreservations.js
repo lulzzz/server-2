@@ -298,11 +298,10 @@ var Qdelete_reservationsById = (id, idExam_center, cb) => {
 
 // -----------------------------------ADVANCE SEARCH------------------------------------------
 var Qget_search=(query,values,cb)=>{
-
     let customQuery='SELECT Reservation.*,Temp_Student.* '+
-                'FROM Timeslot '+
-                'LEFT JOIN Reservation ON Reservation.Timeslot_idTimeslot = Timeslot.idTimeslot '+
-                'LEFT JOIN Temp_Student ON Temp_Student.Reservation_idReservation = Reservation.idReservation '+
+                'FROM Reservation '+
+                'LEFT JOIN Temp_Student ON Reservation.idReservation=Temp_Student.Reservation_idReservation '+
+                'LEFT JOIN Timeslot ON Reservation.Timeslot_idTimeslot = Timeslot.idTimeslot '+
                 'WHERE ' + query;
     console.log(customQuery)
     return myQuery(customQuery,values,(error, results, fields)=>{
