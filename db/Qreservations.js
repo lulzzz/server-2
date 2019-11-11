@@ -39,7 +39,8 @@ var Qget_AllReservationsforSchedule=(idExam_center,cb)=>{
 // get resevation by timeslot
 var Qget_byIdReservation = (id, cb) => {
     return myQuery('SELECT reservation.*,temp_student.*, School_name,'+
-                    'Type_category.idType_category, Type_category.Category, Exam_type.Exam_type_name,timeslot.* '+
+                    'Type_category.idType_category, Type_category.Category, Exam_type.Exam_type_name,timeslot.idTimeslot, '+
+                    'timeslot.Timeslot_date, timeslot.Begin_time, timeslot.End_time,timeslot.Exam_group '+
             'FROM reservation ' +
             'LEFT JOIN Exam_type ON reservation.Exam_type_idExam_type=Exam_type.idExam_type ' +
             'LEFT JOIN Type_category ON Exam_type.Type_category_idType_category = Type_category.idType_category ' +
