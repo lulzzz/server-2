@@ -30,10 +30,16 @@ var bulk = async (id_exam_center) => {
                     // Exam_center_idExam_center:_.map(items,'Exam_center_idExam_center')
                 }))
                 .value()
-            // console.log(withouthids);
+            // To give different expiration depending on day of week
+            var today= moment().format("YYYY-MM-DD");
+            if (moment().weekday()===5){
+                var nextclock=moment().add(3,'day').format("YYYY-MM-DD HH:mm"); 
+            }else if (moment().weekday()===6){
+                var nextclock=moment().add(2,'day').format("YYYY-MM-DD HH:mm");
+            }else {
+                var nextclock=moment().add(1,'day').format("YYYY-MM-DD HH:mm");
+            };
             mapped.forEach(element => {
-                var today= moment().format("YYYY-MM-DD");
-                var nextclock=moment().add(10,'m').format("YYYY-MM-DD HH:mm");
                 var options = {
                     url: config.easy_pay.easy_pay_url,
                     method: 'POST',

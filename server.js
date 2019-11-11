@@ -9,6 +9,7 @@ var controllers = require("./controllers");
 var dbHandlers = require("./db");
 var passport=require('passport');
 require("./controllers").passport;
+
 // var passport = require("./controllers").passport;
 const publicPath=path.join(__dirname, '../public');
 
