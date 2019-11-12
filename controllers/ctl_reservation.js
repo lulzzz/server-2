@@ -64,7 +64,7 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 				};
 			});
 		}else if(req.query.Student_name){
-			dbHandlers.Qgen_reservations.Qget_byStudentNameReservations(req.query.name,req.params.idExam_center,(err,reservations)=>{
+			dbHandlers.Qgen_reservations.Qget_byStudentNameReservations(req.query.Student_name,req.params.idExam_center,(err,reservations)=>{
 				if(err){
 					console.log(err);
 					return res.status(500).json({message: 'Database error fetching reservations by student name'});	
