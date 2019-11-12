@@ -63,7 +63,7 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 					return res.status(200).json(reservations);
 				};
 			});
-		}else if(req.query.name){
+		}else if(req.query.Student_name){
 			dbHandlers.Qgen_reservations.Qget_byStudentNameReservations(req.query.name,req.params.idExam_center,(err,reservations)=>{
 				if(err){
 					console.log(err);
