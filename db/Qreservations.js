@@ -247,15 +247,19 @@ var Qget_byIdbooked_car_plate = (idbooking,cb)=>{
 
 // returns reservations for email to easypay
 var Qget_forEmailReservations = (id,cb)=>{
-    return myQuery('SELECT Exam_type.Exam_type_name,timeslot.Timeslot_date, '+
-        'CONCAT(timeslot.Begin_time,"-",timeslot.End_time) AS "Time",temp_student.Student_name, '+
-        'CONCAT(IF(exam_tax_price IS NULL,price,price+exam_tax_price), " €) AS "Price" '+
-        'FROM reservation,Exam_type,timeslot,temp_student,exam_price '+
-        'WHERE reservation.Exam_type_idExam_type = Exam_type.idExam_type '+
-                'AND reservation.Timeslot_idTimeslot = Timeslot.idTimeslot '+
-                'AND temp_student.Reservation_idReservation = Reservation.idReservation '+
-                'AND Exam_type.idExam_type = exam_price.exam_type_idexam_type '+
-                'AND idReservation IN (?)',[id],(error, results, fields) => {
+    return myQuery('SELECT Exam_type.Exam_type_name, ' +
+                        'DATE_FORMAT(timeslot.Timeslot_date, "%d-%m-%Y") AS "Timeslot_date", ' +
+                        'CONCAT(DATE_FORMAT(timeslot.Begin_time, "%H:%i"), ' +
+                        '-,' +
+                        'DATE_FORMAT(timeslot.End_time, "%H:%i")) AS "Time", ' +
+                        'temp_student.Student_name, ' +
+                        'CONCAT(IF(exam_tax_price IS NULL,price,price+exam_tax_price), " €") AS "Price" ' +
+                    'FROM reservation,Exam_type,timeslot,temp_student,exam_price ' +
+                    'WHERE reservation.Exam_type_idExam_type = Exam_type.idExam_type ' +
+                        'AND reservation.Timeslot_idTimeslot = Timeslot.idTimeslot ' +
+                        'AND temp_student.Reservation_idReservation = Reservation.idReservation ' +
+                        'AND Exam_type.idExam_type = exam_price.exam_type_idexam_type ' +
+                        'AND idReservation IN (?)',[id],(error, results, fields) => {
             error ? cb(error) : cb(false, results);
     });   
 }
