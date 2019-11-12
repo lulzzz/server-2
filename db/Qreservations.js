@@ -249,9 +249,7 @@ var Qget_byIdbooked_car_plate = (idbooking,cb)=>{
 var Qget_forEmailReservations = (id,cb)=>{
     return myQuery('SELECT Exam_type.Exam_type_name, ' +
                         'DATE_FORMAT(timeslot.Timeslot_date, "%d-%m-%Y") AS "Timeslot_date", ' +
-                        'CONCAT(DATE_FORMAT(timeslot.Begin_time, "%H:%i"), ' +
-                        '-,' +
-                        'DATE_FORMAT(timeslot.End_time, "%H:%i")) AS "Time", ' +
+                        'CONCAT(DATE_FORMAT(timeslot.Begin_time, "%H:%i"),"-",DATE_FORMAT(timeslot.End_time, "%H:%i")) AS "Time", ' +
                         'temp_student.Student_name, ' +
                         'CONCAT(IF(exam_tax_price IS NULL,price,price+exam_tax_price), " €") AS "Price" ' +
                     'FROM reservation,Exam_type,timeslot,temp_student,exam_price ' +
@@ -278,7 +276,7 @@ var Qpost_pairReservations = (object, cb) => {
 };
 
 var Qpatch_reservation = (object, id, cb) => {
-    console.log(JSON.stringify(object));
+    // console.log(JSON.stringify(object));
     return myQuery("UPDATE reservation SET ? WHERE idReservation=?", [object, id], (error,results,fields) => {
         error ? cb(error) : cb(false,results)
     });
