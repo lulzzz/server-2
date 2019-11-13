@@ -8,7 +8,7 @@ var fs=require('fs');
 // GET request for Payments
 var getList_Payments = (req,res,next)=>{
 	if (req.params.idExam_center>0 && req.query.saft===undefined){
-		if (req.query.idPayment){
+		if (req.query.idPayment && req.query.send_email===undefined){
 			// complete payment for given id
 			dbHandlers.Qgen_payment.Qget_byId_Payments(req.query.idPayment,(err,payment)=>{
 				if(err){
@@ -39,7 +39,38 @@ var getList_Payments = (req,res,next)=>{
 						};
 					});
 				};
-			});	
+			});
+		// send invoice to client
+		}else if(req.query.idPayment && req.query.send_email){
+			// get invoice reference number
+			dbHandlers.Qgen_payment.Qget_byId_Payments(req.query.idPayment,(e,payment)=>{
+				if (e){
+					console.log(e);
+					res.status(500).json({message:"Error getting payment by id"});		
+				}else{
+					//request the invoice
+					console.log(config.api_invoice.url +'/'+ payment[0].Invoice_num +'/pdf')
+					request({url:config.api_invoice.url +'/'+ payment[0].Invoice_num +'/pdf',method: 'GET'},(e, response, body)=>{
+						console.log('received invoice')
+						if(e){
+							res.status(500).json({message:"Error getting invoice pdf file"});
+						}else{
+							res.status(200).json(body);	
+						};
+					});
+				};
+			});
+		}else if(req.query.permit_invoice){
+			dbHandlers.Qgen_payment.Qget_InvoiceToSend(req.query.permit_invoice,req.params.idExam_center,(e,results)=>{
+				if (e){
+					console.log(err);
+					res.status(500).json({message:"Error getting list of pending invoices"});	
+				}else if(results.length<=0){
+					res.status(204).json({message:"No content"});
+				}else{
+					res.status(200).json(results);
+				};
+			});
 		}else{
 			// all payments for given exam center
 			dbHandlers.Qgen_payment.Qget_AllByExam_Center_Payments(req.params.idExam_center,(err,results)=>{
@@ -542,7 +573,7 @@ async function update_Payment (req,res,next){
 				request_msg.invoice=msg_invoices;
 				// send request to API invoices
 				console.log("------------Invoice requested-------------");
-				console.log(JSON.stringify(request_msg));
+				// console.log(JSON.stringify(request_msg));
 				console.log("------------------------------------------");
 				request({
 					url:config.api_invoice.url,
@@ -550,8 +581,7 @@ async function update_Payment (req,res,next){
 					json:request_msg
 				},(error, response, body)=>{
 					console.log("------------Invoice received-------------");
-					console.log("Invoice received");
-					console.log(JSON.stringify(body));
+					// console.log(JSON.stringify(body));
 					console.log("------------------------------------------");
 					if ("references" in body){
 						it_idpayment=0;
@@ -572,7 +602,7 @@ async function update_Payment (req,res,next){
 					return res.status(200).json(pdf);
 				});
 			}else if (req.body.Exam_center_idExam_center && req.body.idPayment){
-				console.log("one shot!!!");
+				// console.log("one shot!!!");
 				// get info for given exam center
 				var header = await P_get_exam_center(req.body.Exam_center_idExam_center);
 				// creates the message compiled for all invoices to be processed

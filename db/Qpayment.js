@@ -34,7 +34,7 @@ var Qget_byId_Payments = (id,cb)=>{
 	});
 };
 
-var Qget_Payments_without_invoice=(idexam_center,cb)=>{
+var Qget_Payments_without_invoice = (idexam_center,cb)=>{
 	return myQuery('SELECT payment.* FROM payment,transactions '+
 						'WHERE invoice_num IS NULL AND transactions.Exam_center_idExam_center = ? '+
 						'GROUP BY payment.idPayment',[idexam_center],(error, results, fields)=>{
@@ -43,7 +43,7 @@ var Qget_Payments_without_invoice=(idexam_center,cb)=>{
 };
 
 // get payments to be invoice
-var Qget_PaymentsInvoice=(idpayment,idexam_center,cb)=>{
+var Qget_PaymentsInvoice = (idpayment,idexam_center,cb)=>{
 	return myQuery('SELECT payments_to_invoice.*, COUNT(pendent_payments.idPendent_payments) AS `Quantity`,school.permit '+
 			'FROM payments_to_invoice,Transactions,school, pendent_payments '+
 			'WHERE payments_to_invoice.idPayment=Transactions.Payments_idPayments '+
@@ -52,6 +52,20 @@ var Qget_PaymentsInvoice=(idpayment,idexam_center,cb)=>{
 			'AND payments_to_invoice.idPayment = ? AND payments_to_invoice.Exam_center_idExam_center = ? '+
 			'GROUP BY payments_to_invoice.exam_type_code, payments_to_invoice.base_value, payments_to_invoice.idPayment',
 			[idpayment,idexam_center],(error, results, fields)=>{
+		error ? cb(error) : cb(false,results);
+	});
+};
+
+// get payment which invoices werent sent to schools yet
+var Qget_InvoiceToSend = (permit,idexam_center,cb)=>{
+	return myQuery(`SELECT payment.*, transactions.*
+			FROM payment, transactions, school
+			WHERE transactions.Payments_idPayments = payment.idpayment
+        		AND transactions.School_idSchool = School.idSchool
+        		AND School.permit = ? AND payment.Invoice_sent = 0
+        		AND payment.Invoice_num IS NOT NULL
+        		AND School.Exam_center_idExam_center=?`,
+			[permit,idexam_center],(error, results, fields)=>{
 		error ? cb(error) : cb(false,results);
 	});
 };
@@ -107,6 +121,7 @@ module.exports = function(myQuery){
 		Qget_byId_Payments,
 		Qget_Payments_without_invoice,
 		Qget_PaymentsInvoice,
+		Qget_InvoiceToSend,
 		Qcreate_Payment,
 		Qdelete_Payment,
 		Qpatch_Payment,
@@ -114,27 +129,3 @@ module.exports = function(myQuery){
 		Qget_search
 	}
 }
-
-
-
-// // get all payment available for given school
-// var Qget_byId_Payments = (cb)=>{
-// 	return myQuery('SELECT payment.*, Transactions.*, pendent_payments.*, Student.Student_name, '+
-// 						'Student.Student_num, exam_type.Exam_type_name, Timeslot.Timeslot_date, '+
-// 						'Payment_method.Name,school.School_name '+
-// 					'FROM payment,Transactions,pendent_payments,Student_license,Student,Booked,'+
-// 						'exam_type,Timeslot,Payment_method,school '+
-// 					'WHERE payment.idPayment=Transactions.Payments_idPayments '+
-// 						'AND payment.idPayment=pendent_payments.Payments_idPayments '+
-// 						'AND Transactions.Payment_method_idPayment_method=Payment_method.idPayment_method '+
-// 						'AND pendent_payments.Student_license_idStudent_license=Student_license.idStudent_license '+
-// 						'AND Student_license.Student_idStudent=Student.idStudent '+
-// 						'AND Student_license.School_idSchool=School.idSchool '+
-// 						'AND Booked.Student_license_idStudent_license=Student_license.idStudent_license '+
-// 						'AND Booked.Exam_type_idExam_type=Exam_type.idExam_type '+
-// 						'AND Booked.Timeslot_idTimeslot=Timeslot.idTimeslot '
-// 						,null,(error, results, fields)=>{
-// 		error ? cb(error) : cb(false,results);
-// 	});
-// };
-
