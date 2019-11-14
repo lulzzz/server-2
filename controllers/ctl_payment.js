@@ -4,6 +4,7 @@ var _ = require('lodash');
 var moment = require('moment');
 var request= require('request');
 var fs=require('fs');
+var nodemailer = require('nodemailer');
 
 // GET request for Payments
 var getList_Payments = (req,res,next)=>{
@@ -49,13 +50,53 @@ var getList_Payments = (req,res,next)=>{
 					res.status(500).json({message:"Error getting payment by id"});		
 				}else{
 					//request the invoice
-					console.log(config.api_invoice.url +'/'+ payment[0].Invoice_num +'/pdf')
-					request({url:config.api_invoice.url +'/'+ payment[0].Invoice_num +'/pdf',method: 'GET'},(e, response, body)=>{
+					let converted_url=payment[0].Invoice_num.replace(' ','%20');
+					converted_url=converted_url.replace('/','%2F');
+					console.log(config.api_invoice.url +'/'+ converted_url +'/pdf');
+
+					request({url:config.api_invoice.url +'/'+ converted_url +'/pdf',method: 'GET'},(e, response, body)=>{
 						console.log('received invoice')
 						if(e){
 							res.status(500).json({message:"Error getting invoice pdf file"});
 						}else{
-							res.status(200).json(body);	
+							 dbHandlers.Qgen_exam_center.Qget_smtpCredencials(req.params.idExam_center, async(err, smtpResults) => {
+                                if (err || smtpResults <= 0) {
+                                    console.log(err);
+                                    // return res.status(500).json({ message: "Error creating pendent payment" });
+                                } else {
+                                	// var buf = Buffer.from(body, 'base64');
+									// create reusable transporter object using the default SMTP transport
+		                            let transporter = nodemailer.createTransport({
+		                                host: smtpResults[0].SMTP_server,
+		                                // port: 587,
+		                                secure: false,
+		                                auth: {
+		                                    user: smtpResults[0].SMTP_user, // generated ethereal user
+		                                    pass: smtpResults[0].SMTP_pass // generated ethereal password
+		                                },
+		                                tls: {
+		                                    rejectUnauthorized: false
+		                                }
+		                            });
+									//send mail with defined transport object
+		                            let info = await transporter.sendMail({
+		                                from: '"ANIECA" <' + smtpResults[0].SMTP_user + '>', // sender address
+		                                to: 'rui.branco@knowledgebiz.pt', // TODO change to toEmail
+		                                subject: `Fatura ANIECA ${payment[0].Invoice_num}`,
+		                                // text, // plain text body
+		                                html: '<h1>test</h1>',  
+									        attachments: [  
+									        {   
+									            filename: `Fatura ${payment[0].Invoice_num}.pdf`,    
+									            content: Buffer.from(body, 'base64'),
+									            encoding: 'base64' ,
+									            contentType : "application/pdf"   
+									        }]   
+		                            });
+									// res.contentType("application/pdf");
+									res.status(200).json({message:"Invoice sent"});
+                                };
+                            });
 						};
 					});
 				};

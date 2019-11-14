@@ -123,6 +123,7 @@ var getList_ReservationsByIdTimeslot = async (req, res)=>{
 			};
 		}else if (req.query.idReservation){
 			if(req.query.file){
+				// 
 				// get and send back model 2 file for given id reservation
 				return res.status(200).download('./reservas/Print.pdf','testing name');
 			}else{

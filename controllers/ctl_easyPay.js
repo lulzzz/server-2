@@ -12,7 +12,7 @@ var bulk = async (id_exam_center) => {
         console.log("---------------------------------PROCESSO EASY PAY "+ id_exam_center);
         console.log(" -----------------------NUMERO DE VOLTAS "+ result.length);
         console.log("--------------------------------------------------------------------------------");
-        console.log(JSON.stringify(result));
+        // console.log(JSON.stringify(result));
         if (error) {
             console.log(error);
             // return res.status(500).json({ message: "Error getting EasyPay ids." });
@@ -374,7 +374,7 @@ var bulk = async (id_exam_center) => {
                                                                 cid: 'logo'
                                                             }]
                                                         });
-                                                        console.log(info);
+                                                        // console.log(info);
                                                         // return res.status(200).json({ message: 'MB references sent.' });
                                                     };
                                                 });
