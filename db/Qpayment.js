@@ -28,8 +28,9 @@ var Qget_AllByExam_Center_Payments = (idexam_center,cb)=>{
 
 // get all payment available for given school
 var Qget_byId_Payments = (id,cb)=>{
-	return myQuery('SELECT payment.* FROM payment WHERE payment.idPayment=? ',[id],
-						(error, results, fields)=>{
+	return myQuery('SELECT payment.*,school.Email1,school.Email2 FROM payment,transactions,school '+
+				'WHERE transactions.Payments_idPayments=Payment.idPayment AND school.idschool=school_idschool AND payment.idPayment=?',
+				[id],(error, results, fields)=>{
 		error ? cb(error) : cb(false,results);
 	});
 };

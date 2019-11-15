@@ -5,6 +5,7 @@ var moment = require('moment');
 var request= require('request');
 var fs=require('fs');
 var nodemailer = require('nodemailer');
+var htmlFiles = require('../html');
 
 // GET request for Payments
 var getList_Payments = (req,res,next)=>{
@@ -78,14 +79,21 @@ var getList_Payments = (req,res,next)=>{
 		                                    rejectUnauthorized: false
 		                                }
 		                            });
+		                            // var toEmail = payment[0].Email1 || payment[0].Email2;
+									var html = htmlFiles.html_payment(payment[0].Invoice_num);
 									//send mail with defined transport object
 		                            let info = await transporter.sendMail({
 		                                from: '"ANIECA" <' + smtpResults[0].SMTP_user + '>', // sender address
 		                                to: 'rui.branco@knowledgebiz.pt', // TODO change to toEmail
 		                                subject: `Fatura ANIECA ${payment[0].Invoice_num}`,
 		                                // text, // plain text body
-		                                html: '<h1>test</h1>',  
-									        attachments: [  
+		                                html,  
+									        attachments: [
+									        {
+												filename: 'anieca.png',
+												path: __dirname + '/anieca.png', //TODO colocar imagem da anieca algures
+												cid: 'logo'
+											}, 
 									        {   
 									            filename: `Fatura ${payment[0].Invoice_num}.pdf`,    
 									            content: Buffer.from(body, 'base64'),
@@ -93,8 +101,14 @@ var getList_Payments = (req,res,next)=>{
 									            contentType : "application/pdf"   
 									        }]   
 		                            });
+		                            // patch the flag of file sent
+		                            dbHandlers.Qgen_payment.Qpatch_Payment(req.query.idPayment,{Invoice_sent:1},(e)=>{
+		                            	if(e){
+		                            		console.log(e);
+		                            	};
+		                            	return res.status(200).json({message:"Invoice sent"});
+		                            });
 									// res.contentType("application/pdf");
-									res.status(200).json({message:"Invoice sent"});
                                 };
                             });
 						};

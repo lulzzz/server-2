@@ -186,7 +186,12 @@ var postList_Reservations=async(req,res)=>{
 	        } else if (err) {
 	            console.log(err.message);
 	            return res.status(400).json({message:"Bad request"})
-	        }
+	        };
+	        dbHandlers.Qgen_reservations.Qpatch_reservation({file:1},req.query.idReservation,(e)=>{
+	        	if(e){
+	        		console.log(e);
+	        	};
+	        });
 	        return res.status(200).json({message:"Reservation file saved"});
 	    });
 	}else if (!req.query.search){
