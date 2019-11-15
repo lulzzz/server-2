@@ -104,15 +104,30 @@ async function createBooking (req,res,next){
 					}
 				});
 			});
+			// Promise to get sicc status id
+			var P_sicc=new Promise((resolve,reject)=>{
+				// process 1 is always the booking
+				dbHandlers.Qgen_sicc_status.Qget_byProcess_Operation_Sicc_status(1,1,(err,results)=>{
+					if(err){
+						console.log(err);
+						return res.status(500).send({message:"Error getting sicc status"});
+						reject();
+					}else{
+						resolve(results[0].idsicc_status);	
+					}
+				});
+			});
 
 			let temp_status = await P_status.then();
 			let temp_account = await P_account.then();
+			let temp_sicc_status = await P_sicc.the();
 			
 			// creates booking
 			dbHandlers.Qgen_booked.Qcreate_Booking([req.body.Booked_date,req.body.Obs,
-						req.body.Student_license_idStudent_license,req.body.Timeslot_idTimeslot,temp_account,
-						req.body.Exam_center_idExam_center,req.body.Exam_type_idExam_type,temp_status],
-						(err,results)=>{
+						req.body.Student_license_idStudent_license,
+						req.body.Timeslot_idTimeslot,temp_account,
+						req.body.Exam_center_idExam_center,req.body.Exam_type_idExam_type,
+						temp_status,temp_sicc_status],(err,results)=>{
 				if(err){
 					// fail inserting
 					console.log(err);

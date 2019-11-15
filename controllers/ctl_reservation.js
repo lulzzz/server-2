@@ -185,7 +185,7 @@ var postList_Reservations=async(req,res)=>{
 	            return res.status(406).json({message:"Bad format file"});
 	        } else if (err) {
 	            console.log(err.message);
-	            return res.status(400).json({message:"Bad request"})
+	            return res.status(400).json({message:"Bad request"});
 	        };
 	        dbHandlers.Qgen_reservations.Qpatch_reservation({file:1},req.query.idReservation,(e)=>{
 	        	if(e){
