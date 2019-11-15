@@ -191,8 +191,9 @@ var postList_Reservations=async(req,res)=>{
 	        	if(e){
 	        		console.log(e);
 	        	};
+	        	return res.status(200).json({message:"Reservation file saved"});
 	        });
-	        return res.status(200).json({message:"Reservation file saved"});
+	        
 	    });
 	}else if (!req.query.search){
 		// Deletes expired and locked reservations
