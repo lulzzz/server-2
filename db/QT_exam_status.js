@@ -54,7 +54,7 @@ var Qget_byProcessBookedID = (Process,cb) =>{
 
 //get Exam Status 
 var Qget_byProcessAprovedID = (Process,cb) =>{
-  return myQuery('SELECT idexam_status FROM T_exam_status WHERE Process = ? AND Status="Aprovado"',[Process],
+  return myQuery('SELECT idexam_status FROM T_exam_status WHERE Process = ? AND Status="Reserva Validada"',[Process],
               (error, results, fields) =>{
     error ? cb(error): cb(false,results)
   });

@@ -229,7 +229,7 @@ var postList_Reservations=async(req,res)=>{
 						}
 						// It is possible to add reservations
 						if (timeslot[0].number_Reservations + req.body.Block_number <= timeslot[0].Max_Num_Students) {
-							dbHandlers.Qgen_exam_status.Qget_byProcessReservationID(0,(err,idpending)=>{
+							dbHandlers.Qgen_exam_status.Qget_byProcessReservationID(0,(err,id_status_reserv)=>{
 								if(err){
 									console.log(err);
 									return res.status(500).json({message: 'Database error fetching reservation pending id'});
@@ -242,7 +242,7 @@ var postList_Reservations=async(req,res)=>{
 											req.user.user,
 											new Date(new Date().getTime() + (config.reservation.block_time*60000)), 
 											timeslot[0].Exam_type_idExam_type,
-											idpending[0].idexam_status
+											id_status_reserv[0].idexam_status
 										], (error,blocked) => { // Add reservations
 											if (error) {
 												console.log(error);
@@ -258,7 +258,7 @@ var postList_Reservations=async(req,res)=>{
 											req.user.user,
 											new Date(new Date().getTime() + (config.reservation.block_time*60000)),
 											timeslot[0].Exam_type_idExam_type,
-											idpending[0].idexam_status
+											id_status_reserv[0].idexam_status
 										], (error,blocked) => { // Add reservations
 											if (error) {
 												console.log(error);
@@ -424,7 +424,6 @@ var patchList_Reservations=async(req,res,next)=>{
 						return res.status(500).json({message:'Error updating the reservation.'});
 					}else{
 						if (req.query.idTemp_Student) { // Update the temporary student
-							// console.log("--------PATCH RESERVA " + JSON.stringify(req.body));
 							var tmp_st=_.pick(req.body, ['T_ID_type_idT_ID_type', 'Student_name', 'Birth_date', 'ID_num', 'ID_expire_date', 'Tax_num', 
 										'Drive_license_num','Obs','School_Permit', 'Type_category_idType_category', 'Student_license', 
 										'Expiration_date','Student_num','exam_expiration_date']);
