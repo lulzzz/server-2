@@ -555,7 +555,7 @@ var patchList_Reservations=async(req,res,next)=>{
 											dbHandlers.Qgen_student_license.Qcreate_Student_license(
 													[reservation[0].Student_license,
 													reservation[0].Expiration_date,1],
-													tempId,school[0].idSchool,
+													tempId,school.idSchool,
 													reservation[0].idType_category,(err,results)=>{
 												// console.log("license created");
 												if (err){
