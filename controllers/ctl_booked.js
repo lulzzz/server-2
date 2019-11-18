@@ -120,7 +120,7 @@ async function createBooking (req,res,next){
 
 			let temp_status = await P_status.then();
 			let temp_account = await P_account.then();
-			let temp_sicc_status = await P_sicc.the();
+			let temp_sicc_status = await P_sicc.then();
 			
 			// creates booking
 			dbHandlers.Qgen_booked.Qcreate_Booking([req.body.Booked_date,req.body.Obs,
