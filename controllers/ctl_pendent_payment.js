@@ -29,7 +29,7 @@ var getList_Pendent_Payments = (req,res,next)=>{
 					res.status(200).json(taxes);
 				};	
 			});
-		}else if(req.query.idSchool && req.query.examnotpaid){
+		}else if(req.query.School_idSchool && req.query.examnotpaid){
 			//getAll in school
 			dbHandlers.Qgen_pendent_payments.Qget_byNotPaid_Exam(req.params.idExam_center,req.query.idSchool,(err,taxes)=>{
 				if(err){
