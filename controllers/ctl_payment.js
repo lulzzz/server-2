@@ -15,27 +15,27 @@ var getList_Payments = (req,res,next)=>{
 			dbHandlers.Qgen_payment.Qget_byId_Payments(req.query.idPayment,(err,payment)=>{
 				if(err){
 					console.log(err);
-					res.status(500).json({message:"Error getting payment by id"});
+					return res.status(500).json({message:"Error getting payment by id"});
 				}else if(payment.length<=0){
-					res.status(204).json({message:"No content"});
+					return res.status(204).json({message:"No content"});
 				}else{
 					dbHandlers.Qgen_pendent_payments.Qget_byIdPayment_PendentPayment(req.query.idPayment,
 								(err,pendents)=>{
 						if(err){
 							console.log(err);
-							res.status(500).json({message:"Error getting pendent payments for payment"});	
+							return res.status(500).json({message:"Error getting pendent payments for payment"});	
 						}else{
 							dbHandlers.Qgen_transactions.Qget_ByPayment_Transactions(req.query.idPayment,
 									(err,transactions)=>{
 								if (err){
 									console.log(err);
-									res.status(500).json({message:"Error getting transactions for payment"});	
+									return res.status(500).json({message:"Error getting transactions for payment"});	
 								}else{
 									arr_response=[];
 									arr_response.push(payment);
 									arr_response.push(pendents);
 									arr_response.push(transactions);
-									res.status(200).json(arr_response);
+									return res.status(200).json(arr_response);
 								};
 							});	
 						};
@@ -48,7 +48,7 @@ var getList_Payments = (req,res,next)=>{
 			dbHandlers.Qgen_payment.Qget_byId_Payments(req.query.idPayment,(e,payment)=>{
 				if (e){
 					console.log(e);
-					res.status(500).json({message:"Error getting payment by id"});		
+					return res.status(500).json({message:"Error getting payment by id"});		
 				}else{
 					//request the invoice
 					let converted_url=payment[0].Invoice_num.replace(' ','%20');
@@ -215,10 +215,11 @@ var P_associate_PendP= async (id,idpayment) => {
 var create_Payment = (req,res,next)=>{
 	if(!req.query.search){
 		if (req.body.Payment_date && req.body.Total_value){
+			console.log(JSON.stringify(req.body));
 			dbHandlers.Qgen_payment.Qcreate_Payment([req.body.Payment_date,req.body.Total_value],(err,results)=>{
 				if (err){
 					console.log(err);
-					res.status(500).json({message:"Error creating Payment"});	
+					return res.status(500).json({message:"Error creating Payment"});	
 				}else{
 					var idpayment=results.insertId;
 					var array_P_trans=[];
@@ -232,7 +233,7 @@ var create_Payment = (req,res,next)=>{
 						}).catch((err)=>{
 			                // log that I have an error, return the entire array;
 			                console.log(err);
-			                res.status(500).json({message:"Database error creating payment in transactions"});
+			                return res.status(500).json({message:"Database error creating payment in transactions"});
 	    				});
 					req.body.Exams.forEach((element)=>{
 						// console.log(element);
@@ -240,16 +241,16 @@ var create_Payment = (req,res,next)=>{
 					});
 					Promise.all(array_P_PendP)
 	    				.then(()=>{
-							res.status(200).json({message:"Payment created"});	
+							return res.status(200).json({message:"Payment created"});	
 						}).catch((err)=>{
 			                // log that I have an error, return the entire array;
 			                console.log(err);
-			                res.status(500).json({message:"Database error creating payment in pendent payments"});
+			                return res.status(500).json({message:"Database error creating payment in pendent payments"});
 	    				});
 				};
 			});
 		}else{
-			res.status(400).send({message:"Bad request"});	
+			return res.status(400).send({message:"Bad request"});	
 		};
 	}else{
 		var conditions = ['Transactions.Exam_center_idExam_center = ?'];
@@ -301,9 +302,9 @@ var create_Payment = (req,res,next)=>{
 		dbHandlers.Qgen_payment.Qget_search(conditionsStr,values,(err,results)=>{
 			if (err){
 				console.log(err);
-				res.status(500).json({message:"Error getting advance search"});	
+				return res.status(500).json({message:"Error getting advance search"});	
 			}else{
-				res.status(200).json(results);	
+				return res.status(200).json(results);	
 			};	
 		});
 	};
