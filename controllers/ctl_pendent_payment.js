@@ -31,14 +31,14 @@ var getList_Pendent_Payments = (req,res,next)=>{
 			});
 		}else if(req.query.School_idSchool && req.query.examnotpaid){
 			//getAll in school
-			dbHandlers.Qgen_pendent_payments.Qget_byNotPaid_Exam(req.params.idExam_center,req.query.idSchool,(err,taxes)=>{
+			dbHandlers.Qgen_pendent_payments.Qget_byNotPaid_Exam(req.params.idExam_center,req.query.School_idSchool,(err,exams)=>{
 				if(err){
 					console.log(err);
 					res.status(500).json({message:"Database error getting exams to be paid"});
-				}else if(taxes.length<=0){
+				}else if(exams.length<=0){
 					res.status(204).json({message:"No results"});	
 				}else{
-					res.status(200).json(taxes);
+					res.status(200).json(exams);
 				};	
 			});
 		}else if(req.query.taxnotpaid){
