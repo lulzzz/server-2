@@ -147,13 +147,13 @@ var Qupdate_Pauta_route=(idroute,pauta_num,cb)=>{
 	})
 };
 
-// update record in Pauta
-var Qupdate_Pauta_route=(idroute,pauta_num,cb)=>{
-	return myQuery('UPDATE Pauta SET Exam_route_idExam_route=? where Pauta_num=?',
-				[idroute,pauta_num],(error, results,fields)=>{
-		error ? cb(error) : cb(false,results);	
-	})
-};
+// // update record in Pauta
+// var Qupdate_Pauta_route=(idroute,pauta_num,cb)=>{
+// 	return myQuery('UPDATE Pauta SET Exam_route_idExam_route=? where Pauta_num=?',
+// 				[idroute,pauta_num],(error, results,fields)=>{
+// 		error ? cb(error) : cb(false,results);	
+// 	})
+// };
 
 // update record in Pauta
 var Qupdate_Pauta_examiner=(idExaminer_qualifications,idtimeslot,cb)=>{

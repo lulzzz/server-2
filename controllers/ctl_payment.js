@@ -472,6 +472,8 @@ var P_get_payment_info = async (idpayment,idExam_center)=>{
 					console.log(e);
 					// return res.status(500).json({message:"Database error getting payment info"});
 					reject({message:"Database error getting payment info"});
+				}else if(invoice_info.length<=0){
+					reject({message:"Database error getting payment info, invoice_info=0"});	
 				}else{
 					resolve(invoice_info);
 				}
@@ -661,7 +663,7 @@ async function update_Payment (req,res,next){
 				// get info for given exam center
 				var header = await P_get_exam_center(req.body.Exam_center_idExam_center);
 				// creates the message compiled for all invoices to be processed
-				var temp_test=[]
+				var temp_test=[];
 				temp_test.push(req.body);
 				var msg_invoices = await P_generate_invoice_request(temp_test,req.body.Exam_center_idExam_center);
 				// build request msg to api
@@ -690,8 +692,6 @@ async function update_Payment (req,res,next){
 					var pdf=_.pick(body,['pdf']);
 					return res.status(200).json(pdf);
 				});
-
-
 			}else{
 				return res.status(400).json({message:"Bad request"});	
 			};
