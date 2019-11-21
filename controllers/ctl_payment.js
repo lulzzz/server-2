@@ -10,7 +10,31 @@ var htmlFiles = require('../html');
 // GET request for Payments
 var getList_Payments = (req,res,next)=>{
 	if (req.params.idExam_center>0 && req.query.saft===undefined){
-		if (req.query.idPayment && req.query.send_email===undefined){
+		if (req.query.no_invoice){
+			// payments not invoiced list
+			dbHandlers.Qgen_payment.Qget_NOINV_ByExam_center_Payments(req.params.idExam_center,(e,payments)=>{
+				if(e){
+					console.log(e);
+					return res.status(500).json({message:"Error getting payments without invoice"});
+				}else if (payments.length<=0){
+					return res.status(204).json({message:"No content"});
+				}else{
+					return res.status(200).json(payments);	
+				};
+			});
+		}else if(req.query.w_invoice){
+			// payments with invoice list
+			dbHandlers.Qgen_payment.Qget_INV_ByExam_center_Payments(req.params.idExam_center,(e,payments)=>{
+				if(e){
+					console.log(e);
+					return res.status(500).json({message:"Error getting payments with invoice"});
+				}else if (payments.length<=0){
+					return res.status(204).json({message:"No content"});
+				}else{
+					return res.status(200).json(payments);	
+				};
+			});
+		}else if(req.query.idPayment && req.query.send_email===undefined){
 			// complete payment for given id
 			dbHandlers.Qgen_payment.Qget_byId_Payments(req.query.idPayment,(err,payment)=>{
 				if(err){
@@ -215,7 +239,7 @@ var P_associate_PendP= async (id,idpayment) => {
 var create_Payment = (req,res,next)=>{
 	if(!req.query.search){
 		if (req.body.Payment_date && req.body.Total_value){
-			console.log(JSON.stringify(req.body));
+			// console.log(JSON.stringify(req.body));
 			dbHandlers.Qgen_payment.Qcreate_Payment([req.body.Payment_date,req.body.Total_value],(err,results)=>{
 				if (err){
 					console.log(err);
@@ -666,6 +690,7 @@ async function update_Payment (req,res,next){
 				// creates the message compiled for all invoices to be processed
 				var temp_test=[];
 				temp_test.push(req.body);
+				// console.log("One shot invoice " + JSON.stringify(temp_test));
 				var msg_invoices = await P_generate_invoice_request(temp_test,req.body.Exam_center_idExam_center);
 				// build request msg to api
 				var request_msg={};

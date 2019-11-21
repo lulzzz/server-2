@@ -26,6 +26,54 @@ var Qget_AllByExam_Center_Payments = (idexam_center,cb)=>{
 	});
 };
 
+// get all payments for given exam_center without invoice
+var Qget_NOINV_ByExam_center_Payments=(idexam_center,cb)=>{
+	return myQuery(`SELECT * FROM 
+			(SELECT payment.*,school.Permit,school.school_name 
+			FROM payment,Student_license,pendent_payments,school 
+			WHERE payment.idPayment=pendent_payments.Payments_idPayments 
+				AND pendent_payments.Student_license_idStudent_license=Student_license.idStudent_license 
+				AND Student_license.School_idSchool=School.idSchool 
+				AND School.Exam_center_idExam_center=?
+			UNION 
+			SELECT payment.*,temp_student.School_Permit,School.school_name 
+			FROM payment,pendent_payments,school,reservation,temp_student 
+			WHERE payment.idPayment=pendent_payments.Payments_idPayments 
+				AND pendent_payments.Reservation_idReservation=Reservation.idReservation 
+				AND temp_student.Reservation_idReservation=Reservation.idReservation 
+				AND temp_student.School_Permit=School.Permit 
+				AND School.Exam_center_idExam_center=?) AS pay
+			WHERE pay.Invoice_num IS NULL`[idexam_center,idexam_center],
+			(error, results, fields)=>{
+		error ? cb(error) : cb(false,results);
+	});
+};
+
+// get all payments for given exam_center with invoice
+var Qget_INV_ByExam_center_Payments=(idexam_center,cb)=>{
+	return myQuery(`SELECT * FROM 
+			(SELECT payment.*,school.Permit,school.school_name 
+			FROM payment,Student_license,pendent_payments,school 
+			WHERE payment.idPayment=pendent_payments.Payments_idPayments 
+				AND pendent_payments.Student_license_idStudent_license=Student_license.idStudent_license 
+				AND Student_license.School_idSchool=School.idSchool 
+				AND School.Exam_center_idExam_center=?
+			UNION 
+			SELECT payment.*,temp_student.School_Permit,School.school_name 
+			FROM payment,pendent_payments,school,reservation,temp_student 
+			WHERE payment.idPayment=pendent_payments.Payments_idPayments 
+				AND pendent_payments.Reservation_idReservation=Reservation.idReservation 
+				AND temp_student.Reservation_idReservation=Reservation.idReservation 
+				AND temp_student.School_Permit=School.Permit 
+				AND School.Exam_center_idExam_center=?) AS pay
+			WHERE pay.Invoice_num IS NOT NULL`[idexam_center,idexam_center],
+			(error, results, fields)=>{
+		error ? cb(error) : cb(false,results);
+	});
+};
+
+
+
 // get all payment available for given school
 var Qget_byId_Payments = (id,cb)=>{
 	return myQuery('SELECT payment.*,school.Email1,school.Email2 FROM payment,transactions,school '+
@@ -120,6 +168,8 @@ module.exports = function(myQuery){
 		Qget_AllPayments,
 		Qget_AllByExam_Center_Payments,
 		Qget_byId_Payments,
+		Qget_NOINV_ByExam_center_Payments,
+		Qget_INV_ByExam_center_Payments,
 		Qget_Payments_without_invoice,
 		Qget_PaymentsInvoice,
 		Qget_InvoiceToSend,
