@@ -8,32 +8,49 @@ var getList_TimeslotByWeek = async (req, res) => {
 	// console.log("Getting timeslot");
 	// console.log(req.query)
 	// if (req.query.week <= 53 && req.query.year) {
-	if (req.query.begin && req.query.end && req.query.year) {
+	if (req.query.begin && req.query.end) {
 		// console.log("-----------------WEEK " + req.query.week)
 		// let beginningOfWeek = moment().week(req.query.week).year(req.query.year).startOf('week').local().format('YYYY-MM-DD');
 		// console.log("----------------- BEGIN WEEK " + beginningOfWeek)
 		// // console.log("beginningOfWeek " + beginningOfWeek);
 		// let endOfWeek = moment().week(req.query.week).year(req.query.year).startOf('week').add(6, 'days').local().format('YYYY-MM-DD');
 		// console.log("----------------- END WEEK " + endOfWeek)
-		let beginningOfWeek = req.query.begin
-		console.log("----------------- BEGIN WEEK " + beginningOfWeek)
+		// let beginningOfWeek = req.query.begin
+		console.log("----------------- BEGIN WEEK " + req.query.begin)
 		// console.log("beginningOfWeek " + beginningOfWeek);
-		let endOfWeek = req.query.end
-		console.log("----------------- END WEEK " + endOfWeek)
+		// let endOfWeek = req.query.end
+		console.log("----------------- END WEEK " + req.query.end)
 
 		// Gets Timeslots from a specific exam center on a specific week
 		let pTimeslot = new Promise((resolve, reject) => {
-			dbHandlers.Qgen_exam_status.Qget_byProcessCancelID(0,(error,idcancel)=>{
-				if (error) {
-					console.log(error);
-					reject(error);
+			dbHandlers.Qgen_exam_status.Qget_byProcessReservationID(0,(e1,idreserved_reservation)=>{
+				if (e1) {
+					console.log(e1);
+					reject(e1);
 				}else{
-					dbHandlers.Qgen_timeslot.Qget_timeslotByWeek(idcancel[0].idexam_status,beginningOfWeek, endOfWeek, req.params.idExam_center,(error, resTimeslots)=>{ 
-						if (error) {
-							console.log(error);
-							reject(error);
+					dbHandlers.Qgen_exam_status.Qget_byProcessPendentID(0,(e2,idpendent_reservation)=>{
+						if (e2) {
+							console.log(e2);
+							reject(e2);
 						}else{
-							resolve(resTimeslots);	
+							dbHandlers.Qgen_exam_status.Qget_byProcessCancelID(1,(e3,idcancel_booking)=>{
+								if (e3) {
+									console.log(e3);
+									reject(e3);
+								}else{
+									dbHandlers.Qgen_timeslot.Qget_timeslotByWeek(idreserved_reservation[0].idexam_status,
+											idpendent_reservation[0].idexam_status,
+											idcancel_booking[0].idexam_status,
+											req.query.begin, req.query.end, req.params.idExam_center,(error, resTimeslots)=>{ 
+										if (error) {
+											console.log(error);
+											reject(error);
+										}else{
+											resolve(resTimeslots);	
+										};
+									});
+								};	
+							});	
 						};
 					});
 				};	
@@ -41,7 +58,7 @@ var getList_TimeslotByWeek = async (req, res) => {
 		}).catch(() => 0)
 		// Gets groups from a specific week and a specific exam center
 		let pGroups = new Promise((resolve, reject) => {
-			dbHandlers.Qgen_groups.Qget_groupsByWeek(beginningOfWeek, endOfWeek,req.params.idExam_center,(error,groups)=>{ 
+			dbHandlers.Qgen_groups.Qget_groupsByWeek(req.query.begin, req.query.end,req.params.idExam_center,(error,groups)=>{ 
 				if (error) {
 					return reject(error);
 				}else{

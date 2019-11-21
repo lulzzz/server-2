@@ -22,44 +22,44 @@ var Qget_nextTimeslot=(idexam_center,date,time,cb)=>{
 	});
 };
 
-var Qget_timeslotByWeek = (idcancel,iDay, fDay, idExam_center, cb) => {
-    return myQuery("SELECT Timeslot.*, Exam_type.Exam_type_name,Type_category.Category, Num_students as Max_Num_Students, " +
-            "count(if(reservation.T_exam_status_idexam_status !=?,1,null)) as number_Reservations " +
-            "FROM timeslot " +
-            "LEFT JOIN reservation ON timeslot.idTimeslot=reservation.Timeslot_idTimeslot " +
-            "LEFT JOIN Exam_type ON timeslot.Exam_type_idExam_type=Exam_type.idExam_type " +
-            "LEFT JOIN Type_category ON Exam_type.Type_category_idType_category=Type_category.idType_category " + 
-            "WHERE Timeslot_date BETWEEN ? AND ? AND Timeslot.Exam_center_idExam_center=? " +
-            "GROUP BY timeslot.idTimeslot",
-            [idcancel,iDay, fDay, idExam_center], (error,results,fields) => {
-        error ? cb(error) : cb(false,results);
-    });
-};
-
 // var Qget_timeslotByWeek = (idcancel,iDay, fDay, idExam_center, cb) => {
-// return myQuery(`SELECT T1.*,T2.occupied_book, (T1.occupied_reser+T2.occupied_book) as number_Reservations from
-//                     (SELECT Timeslot.*, Exam_type.Exam_type_name,Type_category.Category, Num_students as Max_Num_Students, 
-//                         count(if(reservation.T_exam_status_idexam_status = 3 OR reservation.T_exam_status_idexam_status = 9,1,null)) as occupied_reser
-//                         FROM timeslot 
-//                         LEFT JOIN reservation ON timeslot.idTimeslot=reservation.Timeslot_idTimeslot 
-//                         LEFT JOIN Exam_type ON timeslot.Exam_type_idExam_type=Exam_type.idExam_type 
-//                         LEFT JOIN Type_category ON Exam_type.Type_category_idType_category=Type_category.idType_category 
-//                         WHERE Timeslot_date BETWEEN ? AND ? AND Timeslot.Exam_center_idExam_center=?
-//                         GROUP BY timeslot.idTimeslot) AS T1
-//                 LEFT JOIN (
-//                     SELECT Timeslot.*, Exam_type.Exam_type_name,Type_category.Category, Num_students as Max_Num_Students, 
-//                     count(if(booked.T_exam_status_idexam_status !=8,1,null)) as occupied_book
-//                     FROM timeslot 
-//                     LEFT JOIN booked ON timeslot.idTimeslot=booked.Timeslot_idTimeslot 
-//                     LEFT JOIN Exam_type ON timeslot.Exam_type_idExam_type=Exam_type.idExam_type 
-//                     LEFT JOIN Type_category ON Exam_type.Type_category_idType_category=Type_category.idType_category 
-//                     WHERE Timeslot_date BETWEEN ? AND ? AND Timeslot.Exam_center_idExam_center=?
-//                     GROUP BY timeslot.idTimeslot) 
-//                 AS T2 ON T1.idTimeslot=T2.idTimeslot`,
+//     return myQuery("SELECT Timeslot.*, Exam_type.Exam_type_name,Type_category.Category, Num_students as Max_Num_Students, " +
+//             "count(if(reservation.T_exam_status_idexam_status !=?,1,null)) as number_Reservations " +
+//             "FROM timeslot " +
+//             "LEFT JOIN reservation ON timeslot.idTimeslot=reservation.Timeslot_idTimeslot " +
+//             "LEFT JOIN Exam_type ON timeslot.Exam_type_idExam_type=Exam_type.idExam_type " +
+//             "LEFT JOIN Type_category ON Exam_type.Type_category_idType_category=Type_category.idType_category " + 
+//             "WHERE Timeslot_date BETWEEN ? AND ? AND Timeslot.Exam_center_idExam_center=? " +
+//             "GROUP BY timeslot.idTimeslot",
 //             [idcancel,iDay, fDay, idExam_center], (error,results,fields) => {
 //         error ? cb(error) : cb(false,results);
 //     });
 // };
+
+var Qget_timeslotByWeek = (idstatus_reserved,idstatus_pendent,idcancel_booking,iDay, fDay, idExam_center, cb) => {
+return myQuery(`SELECT T1.*,T2.occupied_book, (T1.occupied_reser+T2.occupied_book) as number_Reservations from
+                    (SELECT Timeslot.*, Exam_type.Exam_type_name,Type_category.Category, Num_students as Max_Num_Students, 
+                        count(if(reservation.T_exam_status_idexam_status = ? OR reservation.T_exam_status_idexam_status = ?,1,null)) as occupied_reser
+                        FROM timeslot 
+                        LEFT JOIN reservation ON timeslot.idTimeslot=reservation.Timeslot_idTimeslot 
+                        LEFT JOIN Exam_type ON timeslot.Exam_type_idExam_type=Exam_type.idExam_type 
+                        LEFT JOIN Type_category ON Exam_type.Type_category_idType_category=Type_category.idType_category 
+                        WHERE Timeslot_date BETWEEN ? AND ? AND Timeslot.Exam_center_idExam_center=?
+                        GROUP BY timeslot.idTimeslot) AS T1
+                LEFT JOIN (
+                    SELECT Timeslot.*, Exam_type.Exam_type_name,Type_category.Category, Num_students as Max_Num_Students, 
+                    count(if(booked.T_exam_status_idexam_status !=?,1,null)) as occupied_book
+                    FROM timeslot 
+                    LEFT JOIN booked ON timeslot.idTimeslot=booked.Timeslot_idTimeslot 
+                    LEFT JOIN Exam_type ON timeslot.Exam_type_idExam_type=Exam_type.idExam_type 
+                    LEFT JOIN Type_category ON Exam_type.Type_category_idType_category=Type_category.idType_category 
+                    WHERE Timeslot_date BETWEEN ? AND ? AND Timeslot.Exam_center_idExam_center=?
+                    GROUP BY timeslot.idTimeslot) 
+                AS T2 ON T1.idTimeslot=T2.idTimeslot`,
+            [idstatus_reserved,idstatus_pendent,iDay, fDay, idExam_center,idcancel_booking,iDay, fDay, idExam_center], (error,results,fields) => {
+        error ? cb(error) : cb(false,results);
+    });
+};
 
 var Qget_TimeslotInDateTime = (Exam_date,Begin_time,End_time, idExam_center, Exam_group, cb) => {
     return myQuery("SELECT Timeslot.*,Exam_type.Exam_type_name,Type_category.Category, Exam_type.Duration, Exam_type.Num_students " + 
